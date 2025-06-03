@@ -1,12 +1,23 @@
 github_users:
-  - torvalds
-  - alshedivat
+  # - torvalds
+  - EthanCornell
+
+repo_description_lines_max: 3
 
 github_repos:
-  - alshedivat/al-folio
-  - twbs/bootstrap
-  - jekyll/jekyll
-  - jquery/jquery
-  - FortAwesome/Font-Awesome
-  - jpswalsh/academicons
-  - mathjax/MathJax
+  - EthanCornell/HazardLFQ-EBRLFQ
+  - EthanCornell/RedLockTree
+  - EthanCornell/Distrbuted-Filesystem
+  - EthanCornell/mini-migration
+  - EthanCornell/Concurrent-webserver
+  - EthanCornell/DSAlib
+  - EthanCornell/Netgraph-Epochization-for-FreeBSD
+  - EthanCornell/Distributed-Raft-based-Chat-Server
+  - EthanCornell/CUDA-Renderer
+  - EthanCornell/MPI-Wandering-Salesman-Solver
+  - EthanCornell/Gossip-protocol
+  - EthanCornell/Cache-replacement-policies
+  - EthanCornell/egos-2000
+
+
+
