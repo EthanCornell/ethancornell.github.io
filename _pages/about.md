@@ -15,22 +15,23 @@ permalink: /
 
 profile:
   align: right
-  image: prof_pic.jpg
+  image: mypic1.png
   image_circular: false # crops the image to make it circular
   more_info: >
 
     <p>New York, NY</p>
 
-selected_papers: true # includes a list of papers marked as "selected={true}"
+selected_papers: false # includes a list of papers marked as "selected={true}"
+selected_projects: false # includes a list of projects marked as "selected={true}"
 social: true # includes social icons at the bottom of the page
 
 announcements:
   enabled: true # includes a list of news items
   scrollable: true # adds a vertical scroll bar if there are more than 3 news items
-  limit: 5 # leave blank to include all the news in the `_news` folder
+  limit: 1 # leave blank to include all the news in the `_news` folder
 
 latest_posts:
-  enabled: true
+  enabled: false
   scrollable: true # adds a vertical scroll bar if there are more than 3 new posts items
   limit: 3 # leave blank to include all the blog posts
 ---
@@ -42,11 +43,10 @@ Put your address / P.O. box / other info right below your picture. You can also 
 Link to your social media connections, too. This theme is set up to use [Font Awesome icons](https://fontawesome.com/) and [Academicons](https://jpswalsh.github.io/academicons/), like the ones below. Add your Facebook, Twitter, LinkedIn, Google Scholar, or just disable all of them. -->
 
 
-I’m a systems-minded software engineer with a focus on concurrency, system-level programming, and performance optimization. With a Master’s in Computer Science from [Cornell Tech](https://tech.cornell.edu/), [Cornell University](https://www.cornell.edu/) and hands-on experience across academia, startups, and open source communities, I enjoy designing high-performance infrastructure—from lock-free queues and log-structured file systems to fault-tolerant migration tools and real-time inventory systems.
+I’m a systems-focused software engineer with a background in operating systems, concurrency, and performance-critical backend development. I earned my Master’s in Computer Science from  from [Cornell Tech](https://tech.cornell.edu/), [Cornell University](https://www.cornell.edu/), where I specialized in building reliable, low-level infrastructure and lock-free data structures.
 
-My recent work includes building a Michael–Scott queue with hybrid memory reclamation (hazard pointers + EBR), crafting a UDP-based crash-resilient distributed file system, and contributing to the FreeBSD networking stack with lock-free concurrency enhancements. I’ve also led the architecture of a multi-threaded order processing and ERP backend for a wholesale tea supplier, supporting clients like IBM Taiwan and Mandarin Oriental.
+My work spans across academic research, industry, and open source. At Cornell, I built a sanitizer-clean Michael–Scott queue with hybrid memory reclamation (hazard pointers + epoch-based reclamation), achieving strong throughput under high contention with zero ABA or use-after-free issues. I also designed a UDP-based, crash-resilient distributed file system with a POSIX-style client API and idempotent RPC handling. In addition, I contributed to the Harmony model checker by optimizing its concurrency model and scaling its performance on multi-core systems, and enhanced the egos-2000 RISC-V OS with a soft TLB and two-level page table for better memory efficiency and robustness.
 
-I’m especially drawn to problems that involve low-level optimization, multi-threaded coordination, or distributed reliability. Whether it’s implementing memory-efficient caching algorithms or debugging race conditions deep in the OS, I enjoy diving into the details to make systems faster, safer, and more scalable.
+In open source, I’ve worked on the FreeBSD networking stack, improving Netgraph concurrency with lock-free programming and memory-safe synchronization under heavy network load. Prior to Cornell, I gained industry experience at ASUS, PCPartner, and Viking Family International, where I built real-time inventory engines, media apps, and CI pipelines, always with a focus on correctness, scalability, and performance.
 
-Currently based in New York, I’m open to collaboration, open source contributions, and backend or systems roles where performance and reliability matter.
-
+Currently based in New York, I enjoy working on problems that push the limits of concurrency, fault tolerance, and system efficiency, whether in kernel code, backend services, or distributed infrastructure.

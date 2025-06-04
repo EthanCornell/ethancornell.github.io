@@ -64,6 +64,14 @@ layout: default
       {% include selected_papers.liquid %}
     {% endif %}
 
+    <!-- Selected projects -->
+    {% if page.selected_projects %}
+      <h2>
+        <a href="{{ '/repositories/' | relative_url }}" style="color: inherit">selected projects</a>
+      </h2>
+      {% include selected_projects.liquid %}
+    {% endif %}
+
     <!-- Social -->
     {% if page.social %}
       <div class="social">
@@ -74,7 +82,7 @@ layout: default
     {% endif %}
 
     {% if site.newsletter and site.newsletter.enabled and site.footer_fixed %}
-      {% include newsletter.liquid center=true %}
+      {% include newsletter.liquid center=false %}
     {% endif %}
   </article>
 </div>

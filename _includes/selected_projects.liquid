@@ -1,0 +1,10 @@
+<div class="repositories">
+  {% for project in site.projects %}
+    {% if project.selected %}
+      <div class="project-card">
+        <h3><a href="{{ project.url | relative_url }}">{{ project.title }}</a></h3>
+        <p>{{ project.excerpt }}</p>
+      </div>
+    {% endif %}
+  {% endfor %}
+</div>

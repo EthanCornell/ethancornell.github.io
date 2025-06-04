@@ -4,6 +4,10 @@
   contents:
     - name: Full Name
       value: I-Hsuan (Ethan) Huang
+    - name: email
+      value: ih246 DOT Cornell DOT edu or <a href='mailto:ethan.huang.ih@gmail.com'>ethan.huang.ih@gmail.com</a>
+    - name: website
+      value: "<a href='https://ethancornell.github.io' target='_blank'>ethancornell.github.io</a>"
     - name: Languages
       value: English, Mandarin Chinese
 
@@ -11,7 +15,8 @@
   type: time_table
   contents:
     - title: Master of Engineering in Computer Science
-      institution: Cornell University, New York, USA
+      institution: "<a href='https://www.cs.cornell.edu/' target='_blank'> Cornell University </a>"
+      location: New York, NY
       year: 2023
       description:
         - Focused on systems programming, concurrency, and memory management.
@@ -21,29 +26,34 @@
   type: time_table
   contents:
     - title: Research Assistant
-      institution: Cornell University
+      institution: "<a href='https://www.cs.cornell.edu/' target='_blank'> Cornell University </a>"
       year: 2023 – Present
+      location: Ithaca, NY
       description:
         - Conducted system-level research in OS design, concurrent programming, and fault-tolerant systems.
         - Built and optimized a model checker and developed high-performance system components.
-    - title: Independent Contributor
-      institution: FreeBSD Project
-      year: 2024 – Present
+    - title: Research Assistant
+      institution: "<a href='https://tech.cornell.edu/' target='_blank'> Cornell Tech, Cornell University </a>"
+      year: 2022 – 2022
+      location: New York, NY
       description:
-        - Contributed to concurrency enhancements in the Netgraph subsystem, applying lockless data flow techniques.
+        - Enhanced the egos-2000 RISC-V operating system by implementing a two-level page table and soft TLB, improving memory efficiency and MMU robustness under concurrent workloads.
     - title: Founding Software Engineer
       institution: Viking Family International
       year: Prior to 2022
+      location: Taipei, Taiwan
       description:
         - Led backend development of an e-commerce platform and optimized business systems.
     - title: Software Engineer
-      institution: PCPartner Group Ltd.
+      institution: "<a href='https://www.pcpartner.com/en/' target='_blank'> PCPartner Group Ltd. </a>"
       year: Prior to 2022
+      location: Taipei, Taiwan
       description:
         - Developed Android-based media solutions integrating DLNA protocol.
     - title: Software R&D Engineer
-      institution: ASUSTek Computer Inc.
+      institution: "<a href='https://www.asus.com/' target='_blank'> ASUSTek Computer Inc. </a>"
       year: Prior to 2022
+      location: Taipei, Taiwan
       description:
         - Improved Android development workflow through automation and CI scripting.
 
@@ -54,12 +64,31 @@
       year: 2024 – now
       description: Concurrency improvements for traffic processing using lockless primitives.
 
-- title: Honors and Awards
-  type: time_table
+# - title: Honors and Awards
+#   type: time_table
+#   contents:
+#     - year: [Redacted]
+#       items:
+#         - Participated in competitive research and open-source contributions in OS-level engineering.
+
+- title: Technical Proficiencies
+  type: nested_list
   contents:
-    - year: [Redacted]
+    - title: Languages
       items:
-        - Participated in competitive research and open-source contributions in OS-level engineering.
+        - C++11/17, C11, Java, Python, Shell Script, JavaScript, PHP
+    - title: OS, Database, Compiler
+      items:
+        - Linux, FreeBSD, UNIX, MacOS, Windows
+        - MySQL, PostgreSQL, SQL
+        - GCC, g++, JVM
+    - title: Tools, APIs
+      items:
+        - Git, GDB, Valgrind, gprof, GCP, Vim, STL, OpenMP, OpenMPI, CUDA, PyTorch
+    - title: Skills
+      items:
+        - Algorithms, Data Structure, Parallel/Concurrency Programming, Memory Management
+
 
 - title: Academic Interests
   type: nested_list
