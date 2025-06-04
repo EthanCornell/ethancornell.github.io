@@ -327,3 +327,4 @@ ninja.data = [
     },
   {%- endif -%}
 ];
+

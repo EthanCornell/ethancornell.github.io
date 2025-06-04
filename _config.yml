@@ -52,6 +52,9 @@ search_enabled: true
 socials_in_search: true
 posts_in_search: false
 bib_search: false
+projects_in_search: false
+news_in_search: true
+books_in_search: false
 
 # Dimensions
 max_width: 930px
@@ -144,13 +147,13 @@ newsletter:
 
 collections:
   books:
-    output: false
+    output: true
   news:
     defaults:
       layout: post
     output: true
   projects:
-    output: false
+    output: true
 
 # -----------------------------------------------------------------------------
 # Jekyll settings
@@ -641,3 +644,6 @@ jsonresume:
   - languages
   - interests
   - references
+
+exclude:
+  - "backup"
