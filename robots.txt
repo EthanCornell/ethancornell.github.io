@@ -1,4 +1,4 @@
 User-agent: *
 Disallow:
 
-Sitemap: https://ethancornell.github.io/ethancornell.github.io//sitemap.xml
+Sitemap: https://ethanhuang.github.io/sitemap.xml
