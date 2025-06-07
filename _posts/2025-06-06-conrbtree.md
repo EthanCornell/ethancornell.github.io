@@ -11,7 +11,7 @@ giscus_comments: false
 
 ## Introduction
 
-Red-Black Trees (RB-Trees) offer guaranteed $O(\log n)$ operations in single-threaded contexts. However, as soon as multiple threads try to query or modify the same tree concurrently, a naive implementation suffers from severe contention and potential deadlocks. In this post, we share a **modest** approach—neither world-beating nor lock-free—to transform a standard RB-Tree into a **thread-safe** data structure in C++. We will:
+Red-Black Trees (RB-Trees) offer guaranteed $O(\log n)$ operations in single-threaded contexts. However, as soon as multiple threads try to query or modify the same tree concurrently, a naive implementation suffers from severe contention and potential deadlocks. In this post, we share a **modest** approach, neither world-beating nor lock-free—to transform a standard RB-Tree into a **thread-safe** data structure in C++. We will:
 
 1. Present our **node layout** and sentinel (`NIL`) design.  
 2. Describe **three reader synchronization strategies**:
@@ -19,7 +19,7 @@ Red-Black Trees (RB-Trees) offer guaranteed $O(\log n)$ operations in single-thr
    * Lock Coupling  
    * Global Reader-Writer Lock  
 3. Show the **core insertion and deletion** code under writer serialization.  
-   * **New:** Include ASCII “flow-charts” illustrating how insert and delete steps happen under concurrency.  
+   * **New:** Include “flow-charts” illustrating how insert and delete steps happen under concurrency.  
 4. Highlight a key portion of **delete fixup** with an diagram.  
 
 Our goal is to share **ideas**, not claim ultimate performance. If you need maximum scalability, consider a lock-free skip list or a B-Tree with fine-grained latches. But if you already know RB-Trees and want a straightforward concurrency-safe version, read on.
@@ -331,7 +331,7 @@ public:
 
 ## 3. Insert & Delete: Core Code Excerpts with Concurrency Flowcharts
 
-All three strategies share the **same** writer logic: any insertion or deletion obtains a global writer lock (either `writers_mutex` or the exclusive `global_rw_lock`). Below are key excerpts, now augmented with ASCII “flow-charts” to illustrate the sequence of steps under concurrency.
+All three strategies share the **same** writer logic: any insertion or deletion obtains a global writer lock (either `writers_mutex` or the exclusive `global_rw_lock`). Below are key excerpts, now augmented with “flow-charts” to illustrate the sequence of steps under concurrency.
 
 ---
 
@@ -422,7 +422,7 @@ private:
 
 #### 3.1.1 Concurrency Flowchart for **Insert**
 
-Below is an ASCII flowchart showing the **sequence of steps** that happen under a concurrent workload—where multiple writers may attempt to insert or delete at once, but only one actually proceeds at a time because of `writers_mutex`.
+Below is an flowchart showing the **sequence of steps** that happen under a concurrent workload—where multiple writers may attempt to insert or delete at once, but only one actually proceeds at a time because of `writers_mutex`.
 
 ```
 Insert(k, v):
@@ -452,16 +452,16 @@ Insert(k, v):
 
 Below is a closer look at the “link + fixup” step inside `insert_fixup`, still holding `writers_mutex`:
 
-```
+```typograms
 [Inside insert_fixup(z)]
   ┌─────────────────────────────────────────────────────────────────┐
-  │   z is RED, parent p = z->parent, grandparent g               │
-  │   while (p.color == RED):                                      │
-  │     if (p == g.left):                                          │
-  │       y = g.right        ← Uncle                              │
-  │       if (y.color == RED):                                     │
-  │         // Case 1: p and y are RED                             │
-  │         p.color = BLACK; y.color = BLACK; g.color = RED;       │
+  │   z is RED, parent p = z->parent, grandparent g                 │
+  │   while (p.color == RED):                                       │
+  │     if (p == g.left):                                           │
+  │       y = g.right        ← Uncle                                │
+  │       if (y.color == RED):                                      │
+  │         // Case 1: p and y are RED                              │
+  │         p.color = BLACK; y.color = BLACK; g.color = RED;        │
   │         z = g;                                                  │
   │       else                                                      │
   │         if (z == p.right):                                      │
@@ -471,7 +471,7 @@ Below is a closer look at the “link + fixup” step inside `insert_fixup`, sti
   │         p.color = BLACK; g.color = RED; right_rotate(g);        │
   │     else  // mirror when p == g.right                           │
   │       ...                                                       │
-  │   root.color = BLACK;   ← Guarantee root is BLACK              │
+  │   root.color = BLACK;   ← Guarantee root is BLACK               │
   └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -563,9 +563,9 @@ private:
 
 #### 3.2.1 Concurrency Flowchart for **Delete**
 
-Below is an ASCII flowchart illustrating how deletion proceeds under concurrent workloads. Again, the **writer** holds the single `writers_mutex` from start to finish, ensuring no other writer can modify the tree simultaneously:
+Below is an flowchart illustrating how deletion proceeds under concurrent workloads. Again, the **writer** holds the single `writers_mutex` from start to finish, ensuring no other writer can modify the tree simultaneously:
 
-```
+```typograms
 Erase(k):
   |
   |  [THREAD T₁] calls erase(k)
@@ -611,9 +611,9 @@ Erase(k):
    * Under **`lookup`**, readers hold per-node shared locks—if a delete’s rotation touches a node a reader currently holds a shared lock on, the delete will block until that shared lock is released.
    * Under **`lookup_hybrid`**, readers block on `global_rw_lock` if the writer holds the exclusive lock.
 
-Below are two delete\_fixup cases (Case 2 and Case 4) illustrated with ASCII diagrams:
+Below are two delete\_fixup cases (Case 2 and Case 4) illustrated with diagrams:
 
-```
+```typograms
 /*───────────────────────────────────────────────────────────────────────
  * CASE 2: Sibling BLACK, both nephews BLACK
  *───────────────────────────────────────────────────────────────────────
@@ -646,7 +646,7 @@ Below are two delete\_fixup cases (Case 2 and Case 4) illustrated with ASCII dia
  *───────────────────────────────────────────────────────────────────────*/
 ```
 
-Although those two cases are **inside** `delete_fixup`, they do not illustrate concurrency per se—they illustrate local color/rotation adjustments. Concurrency comes into play if a reader holds a shared lock on any of these nodes; the writer will wait for the reader to release that lock.
+Although those two cases are **inside** `delete_fixup`, they do not illustrate concurrency per se, they illustrate local color/rotation adjustments. Concurrency comes into play if a reader holds a shared lock on any of these nodes; the writer will wait for the reader to release that lock.
 
 ---
 
@@ -676,7 +676,7 @@ In this post, we have sketched a **straightforward** approach to make a Red-Blac
    * **Delete:** acquire `writers_mutex` → splice out node → `delete_fixup` → release.
    * Readers may block or progress concurrently depending on chosen lookup strategy.
 
-5. **Delete Fixup Cases** (Case 2 and Case 4 shown with ASCII diagrams)
+5. **Delete Fixup Cases** (Case 2 and Case 4 shown with diagrams)
 
 Although a specialized lock-free or latch-coupled B-Tree may offer better raw performance on large, highly contested workloads, this approach is easy to understand and maintain if you already know single-threaded Red-Black Trees. It preserves \$O(\log n)\$ complexity in the absence of contention, and it offers three clear points of trade-off between simplicity and reader parallelism.
 
