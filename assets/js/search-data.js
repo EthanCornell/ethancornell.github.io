@@ -9,7 +9,14 @@ ninja.data = [{
     handler: () => {
       window.location.href = "/";
     },
-  },{id: "nav-repositories",
+  },{id: "nav-blog",
+          title: "blog",
+          description: "",
+          section: "Navigation",
+          handler: () => {
+            window.location.href = "/blog/";
+          },
+        },{id: "nav-repositories",
           title: "repositories",
           description: "A curated collection of my system-level and backend engineering projects, focused on concurrency, distributed systems, memory management, and performance optimization. These include a sanitizer-clean Michael–Scott queue with hybrid memory reclamation, a crash-resilient UDP-based distributed file system, enhancements to the Harmony model checker, memory subsystem improvements for the egos-2000 RISC-V OS, lock-free concurrency work on FreeBSD’s Netgraph, and a fault-tolerant file migration tool with real-time telemetry. Each project emphasizes robustness, efficiency, and maintainability, with source code, documentation, and CI pipelines available for review.",
           section: "Navigation",
@@ -23,7 +30,18 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/cv/";
           },
-        },{id: "news-may-2023-graduated-from-cornell-tech-cornell-university-with-m-eng-in-computer-science",
+        },{id: "post-modern-concurrent-red-black-tree-design-in-c-a-practical-guide-part-1",
+        
+          title: "Modern Concurrent Red-Black Tree Design in C++: A Practical Guide - Part 1...",
+        
+        description: "Sharing ideas on making a Red-Black Tree thread-safe using C++ shared_mutex and multiple reader strategies, plus visual flowcharts for insert/delete under concurrency",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/conrbtree/";
+          
+        },
+      },{id: "news-may-2023-graduated-from-cornell-tech-cornell-university-with-m-eng-in-computer-science",
           title: 'May 2023 – Graduated from Cornell Tech, Cornell University with M.Eng in Computer...',
           description: "",
           section: "News",},{id: "news-in-april-2024-i-joined-the-freebsd-community-as-an-independent-contributor-focusing-on-kernel-module-optimization-netgraph-subsystem-refactoring-and-experimenting-with-zero-copy-ipc-using-epoch-9-epoch-based-memory-reclamation",
