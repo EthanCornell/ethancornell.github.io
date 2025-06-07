@@ -1,7 +1,7 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://ethanhuang.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://ethanhuang.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2025-06-06T21:39:23-04:00</updated><id>https://ethanhuang.github.io/feed.xml</id><title type="html">blank</title><subtitle>A simple, whitespace theme for academics. Based on [*folio](https://github.com/bogoli/-folio) design.
-</subtitle><entry><title type="html">Modern Concurrent Red-Black Tree Design in C++: A Practical Guide - Part 1</title><link href="https://ethanhuang.github.io/blog/2025/conrbtree/" rel="alternate" type="text/html" title="Modern Concurrent Red-Black Tree Design in C++: A Practical Guide - Part 1" /><published>2025-06-06T12:09:00-04:00</published><updated>2025-06-06T12:09:00-04:00</updated><id>https://ethanhuang.github.io/blog/2025/conrbtree</id><content type="html" xml:base="https://ethanhuang.github.io/blog/2025/conrbtree/"><![CDATA[<h2 id="introduction">Introduction</h2>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" hreflang="en" /><updated>2025-06-06T22:01:17-04:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">blank</title><subtitle>A simple, whitespace theme for academics. Based on [*folio](https://github.com/bogoli/-folio) design.
+</subtitle><entry><title type="html">Modern Concurrent Red-Black Tree Design in C++: A Practical Guide - Part 1</title><link href="http://localhost:4000/blog/2025/conrbtree/" rel="alternate" type="text/html" title="Modern Concurrent Red-Black Tree Design in C++: A Practical Guide - Part 1" /><published>2025-06-06T12:09:00-04:00</published><updated>2025-06-06T12:09:00-04:00</updated><id>http://localhost:4000/blog/2025/conrbtree</id><content type="html" xml:base="http://localhost:4000/blog/2025/conrbtree/"><![CDATA[<h2 id="introduction">Introduction</h2>
 
-<p>Red-Black Trees (RB-Trees) offer guaranteed $O(\log n)$ operations in single-threaded contexts. However, as soon as multiple threads try to query or modify the same tree concurrently, a naive implementation suffers from severe contention and potential deadlocks. In this post, we share a <strong>modest</strong> approach—neither world-beating nor lock-free—to transform a standard RB-Tree into a <strong>thread-safe</strong> data structure in C++. We will:</p>
+<p>Red-Black Trees (RB-Trees) offer guaranteed $O(\log n)$ operations in single-threaded contexts. However, as soon as multiple threads try to query or modify the same tree concurrently, a naive implementation suffers from severe contention and potential deadlocks. In this post, we share a <strong>modest</strong> approach, neither world-beating nor lock-free—to transform a standard RB-Tree into a <strong>thread-safe</strong> data structure in C++. We will:</p>
 
 <ol>
   <li>Present our <strong>node layout</strong> and sentinel (<code class="language-plaintext highlighter-rouge">NIL</code>) design.</li>
@@ -14,7 +14,7 @@
   </li>
   <li>Show the <strong>core insertion and deletion</strong> code under writer serialization.
     <ul>
-      <li><strong>New:</strong> Include ASCII “flow-charts” illustrating how insert and delete steps happen under concurrency.</li>
+      <li><strong>New:</strong> Include “flow-charts” illustrating how insert and delete steps happen under concurrency.</li>
     </ul>
   </li>
   <li>Highlight a key portion of <strong>delete fixup</strong> with an diagram.</li>
@@ -343,7 +343,7 @@ When two threads attempt to acquire locks on adjacent nodes (parent and child) i
 
 <h2 id="3-insert--delete-core-code-excerpts-with-concurrency-flowcharts">3. Insert &amp; Delete: Core Code Excerpts with Concurrency Flowcharts</h2>
 
-<p>All three strategies share the <strong>same</strong> writer logic: any insertion or deletion obtains a global writer lock (either <code class="language-plaintext highlighter-rouge">writers_mutex</code> or the exclusive <code class="language-plaintext highlighter-rouge">global_rw_lock</code>). Below are key excerpts, now augmented with ASCII “flow-charts” to illustrate the sequence of steps under concurrency.</p>
+<p>All three strategies share the <strong>same</strong> writer logic: any insertion or deletion obtains a global writer lock (either <code class="language-plaintext highlighter-rouge">writers_mutex</code> or the exclusive <code class="language-plaintext highlighter-rouge">global_rw_lock</code>). Below are key excerpts, now augmented with “flow-charts” to illustrate the sequence of steps under concurrency.</p>
 
 <hr />
 
@@ -433,7 +433,7 @@ When two threads attempt to acquire locks on adjacent nodes (parent and child) i
 
 <h4 id="311-concurrency-flowchart-for-insert">3.1.1 Concurrency Flowchart for <strong>Insert</strong></h4>
 
-<p>Below is an ASCII flowchart showing the <strong>sequence of steps</strong> that happen under a concurrent workload—where multiple writers may attempt to insert or delete at once, but only one actually proceeds at a time because of <code class="language-plaintext highlighter-rouge">writers_mutex</code>.</p>
+<p>Below is an flowchart showing the <strong>sequence of steps</strong> that happen under a concurrent workload—where multiple writers may attempt to insert or delete at once, but only one actually proceeds at a time because of <code class="language-plaintext highlighter-rouge">writers_mutex</code>.</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Insert(k, v):
   |
@@ -468,15 +468,15 @@ When two threads attempt to acquire locks on adjacent nodes (parent and child) i
 
 <p>Below is a closer look at the “link + fixup” step inside <code class="language-plaintext highlighter-rouge">insert_fixup</code>, still holding <code class="language-plaintext highlighter-rouge">writers_mutex</code>:</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[Inside insert_fixup(z)]
+<pre><code class="language-typograms">[Inside insert_fixup(z)]
   ┌─────────────────────────────────────────────────────────────────┐
-  │   z is RED, parent p = z-&gt;parent, grandparent g               │
-  │   while (p.color == RED):                                      │
-  │     if (p == g.left):                                          │
-  │       y = g.right        ← Uncle                              │
-  │       if (y.color == RED):                                     │
-  │         // Case 1: p and y are RED                             │
-  │         p.color = BLACK; y.color = BLACK; g.color = RED;       │
+  │   z is RED, parent p = z-&gt;parent, grandparent g                 │
+  │   while (p.color == RED):                                       │
+  │     if (p == g.left):                                           │
+  │       y = g.right        ← Uncle                                │
+  │       if (y.color == RED):                                      │
+  │         // Case 1: p and y are RED                              │
+  │         p.color = BLACK; y.color = BLACK; g.color = RED;        │
   │         z = g;                                                  │
   │       else                                                      │
   │         if (z == p.right):                                      │
@@ -486,9 +486,9 @@ When two threads attempt to acquire locks on adjacent nodes (parent and child) i
   │         p.color = BLACK; g.color = RED; right_rotate(g);        │
   │     else  // mirror when p == g.right                           │
   │       ...                                                       │
-  │   root.color = BLACK;   ← Guarantee root is BLACK              │
+  │   root.color = BLACK;   ← Guarantee root is BLACK               │
   └─────────────────────────────────────────────────────────────────┘
-</code></pre></div></div>
+</code></pre>
 
 <p>Because <code class="language-plaintext highlighter-rouge">writers_mutex</code> is held the entire time, <strong>no other writer</strong> can interleave, and <strong>no incremental per-node locking</strong> is needed here.</p>
 
@@ -577,9 +577,9 @@ When two threads attempt to acquire locks on adjacent nodes (parent and child) i
 
 <h4 id="321-concurrency-flowchart-for-delete">3.2.1 Concurrency Flowchart for <strong>Delete</strong></h4>
 
-<p>Below is an ASCII flowchart illustrating how deletion proceeds under concurrent workloads. Again, the <strong>writer</strong> holds the single <code class="language-plaintext highlighter-rouge">writers_mutex</code> from start to finish, ensuring no other writer can modify the tree simultaneously:</p>
+<p>Below is an flowchart illustrating how deletion proceeds under concurrent workloads. Again, the <strong>writer</strong> holds the single <code class="language-plaintext highlighter-rouge">writers_mutex</code> from start to finish, ensuring no other writer can modify the tree simultaneously:</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Erase(k):
+<pre><code class="language-typograms">Erase(k):
   |
   |  [THREAD T₁] calls erase(k)
   |     1. unique_lock(writers_mutex)   ←  (Blocks if another writer is in progress)
@@ -613,7 +613,7 @@ When two threads attempt to acquire locks on adjacent nodes (parent and child) i
   |     5. unlock(writers_mutex)
   |
   └──&gt; Completed deletion
-</code></pre></div></div>
+</code></pre>
 
 <p><strong>Key points under concurrency:</strong></p>
 
@@ -630,9 +630,9 @@ When two threads attempt to acquire locks on adjacent nodes (parent and child) i
   </li>
 </ol>
 
-<p>Below are two delete_fixup cases (Case 2 and Case 4) illustrated with ASCII diagrams:</p>
+<p>Below are two delete_fixup cases (Case 2 and Case 4) illustrated with diagrams:</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/*───────────────────────────────────────────────────────────────────────
+<pre><code class="language-typograms">/*───────────────────────────────────────────────────────────────────────
  * CASE 2: Sibling BLACK, both nephews BLACK
  *───────────────────────────────────────────────────────────────────────
  * No BLACK nodes to "borrow" from sibling subtree.
@@ -645,7 +645,7 @@ When two threads attempt to acquire locks on adjacent nodes (parent and child) i
  *         /  \                  /   \
  *       a(B) b(B)            a(B)  b(B)
  *───────────────────────────────────────────────────────────────────────*/
-</code></pre></div></div>
+</code></pre>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/*───────────────────────────────────────────────────────────────────────
  * CASE 4: Sibling BLACK, far nephew RED
@@ -663,7 +663,7 @@ When two threads attempt to acquire locks on adjacent nodes (parent and child) i
  *───────────────────────────────────────────────────────────────────────*/
 </code></pre></div></div>
 
-<p>Although those two cases are <strong>inside</strong> <code class="language-plaintext highlighter-rouge">delete_fixup</code>, they do not illustrate concurrency per se—they illustrate local color/rotation adjustments. Concurrency comes into play if a reader holds a shared lock on any of these nodes; the writer will wait for the reader to release that lock.</p>
+<p>Although those two cases are <strong>inside</strong> <code class="language-plaintext highlighter-rouge">delete_fixup</code>, they do not illustrate concurrency per se, they illustrate local color/rotation adjustments. Concurrency comes into play if a reader holds a shared lock on any of these nodes; the writer will wait for the reader to release that lock.</p>
 
 <hr />
 
@@ -707,7 +707,7 @@ When two threads attempt to acquire locks on adjacent nodes (parent and child) i
     </ul>
   </li>
   <li>
-    <p><strong>Delete Fixup Cases</strong> (Case 2 and Case 4 shown with ASCII diagrams)</p>
+    <p><strong>Delete Fixup Cases</strong> (Case 2 and Case 4 shown with diagrams)</p>
   </li>
 </ol>
 
