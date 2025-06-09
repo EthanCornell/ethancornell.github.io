@@ -3,9 +3,9 @@
   type: map
   contents:
     - name: Full Name
-      value: I-Hsuan (Ethan) Huang
+      value: Ethan Huang
     - name: email
-      value: ih246 DOT Cornell DOT edu or <a href='mailto:ethan.huang.ih@gmail.com'>ethan.huang.ih@gmail.com</a>
+      value: "ethan&#46;huang&#46;ih&#64;gmail&#46;com"
     - name: website
       value: "<a href='https://ethancornell.github.io' target='_blank'>ethancornell.github.io</a>"
     - name: Languages
