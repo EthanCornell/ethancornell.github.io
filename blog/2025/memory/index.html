@@ -59,7 +59,7 @@
   <link rel="shortcut icon" href="data:image/svg+xml,&lt;svg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20100%22&gt;&lt;text%20y=%22.9em%22%20font-size=%2290%22&gt;%E2%9A%9B%EF%B8%8F&lt;/text&gt;&lt;/svg&gt;">
 
 <link rel="stylesheet" href="/assets/css/main.css?d41d8cd98f00b204e9800998ecf8427e">
-<link rel="canonical" href="http://localhost:4000/blog/2025/memory/">
+<link rel="canonical" href="https://ethanhuang.github.io/blog/2025/memory/">
 
 <!-- Dark Mode -->
 <script src="/assets/js/theme.js?f2531f05c6f8e1622518f4f5a1e385b1"></script>
@@ -356,7 +356,19 @@
   <li><a href="#13-lessons-learned">Lessons Learned</a></li>
   <li><a href="#14-path-to-production-whats-missing-and-why">Path to Production: What’s Missing and Why</a></li>
   <li><a href="#15-conclusion">Conclusion</a></li>
-  <li><a href="#appendix-a-comprehensive-test-suite">Appendix A: Comprehensive Test Suite</a></li>
+  <li>
+<a href="#appendix-a-comprehensive-test-suite">Appendix A: Comprehensive Test Suite</a>
+    <ul>
+      <li>16.1 <a href="#mini_malloch">mini_malloc.h</a>
+</li>
+      <li>16.2 <a href="#mini_mallocc">mini_malloc.c</a>
+</li>
+      <li>16.3 <a href="#test_mini_mallocc">test_mini_malloc.c</a>
+</li>
+      <li>16.4 <a href="#output">output</a>
+</li>
+    </ul>
+  </li>
 </ol>
 
 <hr>
@@ -1615,6 +1627,8 @@ Memory layout:  [block_meta][....user data....][block_meta][....user data....]
 
 <p>Below you’ll find the complete source for <code class="language-plaintext highlighter-rouge">mini_malloc.h</code>, <code class="language-plaintext highlighter-rouge">mini_malloc.c</code>, and the <code class="language-plaintext highlighter-rouge">test_mini_malloc.c</code> harness, covering every aspect of functionality—from basic correctness checks to stress testing and white-box introspection.</p>
 
+<h3 id="mini_malloch">mini_malloc.h</h3>
+
 <div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/*
  * mini_malloc.h - Header file for mini_malloc memory allocator
  *
@@ -1782,6 +1796,9 @@ Memory layout:  [block_meta][....user data....][block_meta][....user data....]
 <span class="cp">#endif </span><span class="cm">/* MINI_MALLOC_H */</span><span class="cp">
 </span>
 </code></pre></div></div>
+<hr>
+
+<h3 id="mini_mallocc">mini_malloc.c</h3>
 
 <div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/*
  * mini_malloc.c — A small first‐fit memory allocator
@@ -2958,6 +2975,10 @@ Memory layout:  [block_meta][....user data....][block_meta][....user data....]
 
 </code></pre></div></div>
 
+<hr>
+
+<h3 id="test_mini_mallocc">test_mini_malloc.c</h3>
+
 <div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/*
  * test_mini_malloc.c - Comprehensive test suite for mini_malloc
  *
@@ -3729,6 +3750,9 @@ Memory layout:  [block_meta][....user data....][block_meta][....user data....]
     <span class="k">return</span> <span class="n">tests_failed</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="o">?</span> <span class="mi">1</span> <span class="o">:</span> <span class="mi">0</span><span class="p">;</span>
 <span class="p">}</span>
 </code></pre></div></div>
+<hr>
+
+<h3 id="output">output</h3>
 
 <pre><code class="language-output">Starting mini_malloc test suite...
 
