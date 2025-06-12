@@ -647,3 +647,4 @@ jsonresume:
 
 exclude:
   - "backup"
+  - "venv"
