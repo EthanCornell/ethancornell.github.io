@@ -1,17 +1,326 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" hreflang="en" /><updated>2025-06-12T00:19:09-04:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">blank</title><subtitle>A simple, whitespace theme for academics. Based on [*folio](https://github.com/bogoli/-folio) design.
-</subtitle><entry><title type="html">mini_malloc: From Scratch to Safe: Building a Thread-Safe Memory Allocator in C</title><link href="http://localhost:4000/blog/2025/memory/" rel="alternate" type="text/html" title="mini_malloc: From Scratch to Safe: Building a Thread-Safe Memory Allocator in C" /><published>2025-06-10T16:23:00-04:00</published><updated>2025-06-10T16:23:00-04:00</updated><id>http://localhost:4000/blog/2025/memory</id><content type="html" xml:base="http://localhost:4000/blog/2025/memory/"><![CDATA[<p>This technical note provides a comprehensive analysis of <strong>mini_malloc</strong>, a custom memory allocator implementation that demonstrates key concepts in systems programming. The allocator features:</p>
+<!DOCTYPE html>
+<html lang="en">
+  <!-- Head -->
+  <head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <!-- Metadata, OpenGraph and Schema.org -->
+
+
+
+
+<!-- Standard metadata -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>
+  
+  
+    
+      mini_malloc: From Scratch to Safe: Building a Thread-Safe Memory Allocator in C | Ethan Huang
+    
+  
+</title>
+<meta name="author" content="Ethan Huang">
+<meta name="description" content="This document provides an in-depth look at the design and implementation of **mini_malloc**, a small, first-fit, thread-safe memory allocator in C. It covers the allocator’s architecture, data structures, algorithms, debugging facilities, and testing strategy.">
+
+  <meta name="keywords" content="jekyll, jekyll-theme, academic-website, portfolio-website">
+
+
+
+
+
+
+
+
+
+
+<!-- Bootstrap & MDB -->
+<link rel="stylesheet" href="/assets/css/bootstrap.min.css?a4b3f509e79c54a512b890d73235ef04">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/css/mdb.min.css" integrity="sha256-jpjYvU3G3N6nrrBwXJoVEYI/0zw8htfFnhT9ljN3JJw=" crossorigin="anonymous">
+
+
+
+<!-- Fonts & Icons -->
+<link defer rel="stylesheet" href="/assets/css/academicons.min.css?f0b7046b84e425c55f3463ac249818f5">
+<link defer rel="stylesheet" href="/assets/css/scholar-icons.css?62b2ac103a88034e6882a5be5f3e2772">
+<link defer rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:100,300,400,500,700|Material+Icons&amp;display=swap">
+
+<!-- Code Syntax Highlighting -->
+<link defer rel="stylesheet" href="/assets/css/jekyll-pygments-themes-github.css?591dab5a4e56573bf4ef7fd332894c99" media="" id="highlight_theme_light">
+
+
+
+<!-- Styles -->
+
+
+
+
+  <link rel="shortcut icon" href="data:image/svg+xml,&lt;svg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20100%22&gt;&lt;text%20y=%22.9em%22%20font-size=%2290%22&gt;%E2%9A%9B%EF%B8%8F&lt;/text&gt;&lt;/svg&gt;">
+
+<link rel="stylesheet" href="/assets/css/main.css?d41d8cd98f00b204e9800998ecf8427e">
+<link rel="canonical" href="http://localhost:4000/blog/2025/memory/">
+
+<!-- Dark Mode -->
+<script src="/assets/js/theme.js?f2531f05c6f8e1622518f4f5a1e385b1"></script>
+
+  <link defer rel="stylesheet" href="/assets/css/jekyll-pygments-themes-native.css?5847e5ed4a4568527aa6cfab446049ca" media="none" id="highlight_theme_dark">
+  <script>
+    initTheme();
+  </script>
+
+
+
+
+
+
+
+
+
+
+  </head>
+
+  <!-- Body -->
+  <body class="fixed-top-nav ">
+    <!-- Header -->
+    <header>
+  <!-- Nav Bar -->
+  <nav id="navbar" class="navbar navbar-light navbar-expand-sm fixed-top" role="navigation">
+    <div class="container">
+      
+        <a class="navbar-brand title font-weight-lighter" href="/">
+          
+            
+              <span class="font-weight-bold">Ethan</span>
+            
+            
+            Huang
+          
+        </a>
+      
+      <!-- Navbar Toggle -->
+      <button class="navbar-toggler collapsed ml-auto" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar top-bar"></span>
+        <span class="icon-bar middle-bar"></span>
+        <span class="icon-bar bottom-bar"></span>
+      </button>
+
+      <div class="collapse navbar-collapse text-right" id="navbarNav">
+        <ul class="navbar-nav ml-auto flex-nowrap">
+          
+
+          <!-- About -->
+          <li class="nav-item ">
+            <a class="nav-link" href="/">about
+              
+            </a>
+          </li>
+
+          <!-- Other pages -->
+          
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+          
+            
+              
+                
+                <li class="nav-item active">
+                  <a class="nav-link" href="/blog/">blog
+                    
+                  </a>
+                </li>
+              
+            
+          
+            
+          
+            
+          
+            
+              
+                
+                <li class="nav-item ">
+                  <a class="nav-link" href="/repositories/">repositories
+                    
+                  </a>
+                </li>
+              
+            
+          
+            
+              
+                
+                <li class="nav-item ">
+                  <a class="nav-link" href="/cv/">cv
+                    
+                  </a>
+                </li>
+              
+            
+          
+            
+          
+            
+          
+            
+          
+          
+            <!-- Search -->
+            <li class="nav-item">
+              <button id="search-toggle" title="Search" onclick="openSearchModal()">
+                <span class="nav-link">ctrl k <i class="ti ti-search"></i></span>
+              </button>
+            </li>
+          
+          
+            <!-- Toogle theme mode -->
+            <li class="toggle-container">
+              <button id="light-toggle" title="Change theme">
+                <i class="ti ti-sun-moon" id="light-toggle-system"></i>
+                <i class="ti ti-moon-filled" id="light-toggle-dark"></i>
+                <i class="ti ti-sun-filled" id="light-toggle-light"></i>
+              </button>
+            </li>
+          
+        </ul>
+      </div>
+    </div>
+  </nav>
+  
+    <!-- Scrolling Progress Bar -->
+    <progress id="progress" value="0">
+      <div class="progress-container">
+        <span class="progress-bar"></span>
+      </div>
+    </progress>
+  
+</header>
+
+
+    <!-- Content -->
+    <div class="container mt-5" role="main">
+      
+        
+
+
+
+
+
+
+<div class="post">
+  <header class="post-header">
+    <h1 class="post-title">mini_malloc: From Scratch to Safe: Building a Thread-Safe Memory Allocator in C</h1>
+    <p class="post-meta">
+      Created on June 10, 2025
+      
+      
+      
+    </p>
+    <p class="post-tags">
+      
+        <a href="/blog/2025"> <i class="fa-solid fa-calendar fa-sm"></i> 2025 </a>
+      
+      
+          ·  
+        
+          
+            <a href="/blog/tag/concurrent"> <i class="fa-solid fa-hashtag fa-sm"></i> concurrent</a>
+          
+          
+             
+          
+        
+          
+            <a href="/blog/tag/c-c"> <i class="fa-solid fa-hashtag fa-sm"></i> c/c++</a>
+          
+          
+             
+          
+        
+          
+            <a href="/blog/tag/ds-and-algorithms"> <i class="fa-solid fa-hashtag fa-sm"></i> ds-and-algorithms</a>
+          
+          
+        
+      
+
+      
+          ·  
+        
+          
+            <a href="/blog/category/computer-sciences"> <i class="fa-solid fa-tag fa-sm"></i> computer-sciences</a>
+          
+          
+             
+          
+        
+          
+            <a href="/blog/category/operating-systems"> <i class="fa-solid fa-tag fa-sm"></i> operating_systems</a>
+          
+          
+        
+      
+    </p>
+  </header>
+
+  <article class="post-content">
+    
+    <div id="markdown-content">
+      <p>This technical note provides a comprehensive analysis of <strong>mini_malloc</strong>, a custom memory allocator implementation that demonstrates key concepts in systems programming. The allocator features:</p>
 
 <ul>
-  <li><strong>Thread-safe operation</strong> using per-arena locking with striped lock distribution</li>
-  <li><strong>Dual allocation strategies</strong>: sbrk for small blocks, mmap for large allocations</li>
-  <li><strong>Fragmentation control</strong> through block splitting and coalescing</li>
-  <li><strong>Debug capabilities</strong> with heap validation and corruption detection</li>
-  <li><strong>Production-quality testing</strong> with comprehensive test suite</li>
+  <li>
+<strong>Thread-safe operation</strong> using per-arena locking with striped lock distribution</li>
+  <li>
+<strong>Dual allocation strategies</strong>: sbrk for small blocks, mmap for large allocations</li>
+  <li>
+<strong>Fragmentation control</strong> through block splitting and coalescing</li>
+  <li>
+<strong>Debug capabilities</strong> with heap validation and corruption detection</li>
+  <li>
+<strong>Production-quality testing</strong> with comprehensive test suite</li>
 </ul>
 
 <p>The implementation balances simplicity (under 800 lines) with real-world functionality, making it suitable for educational purposes, embedded systems, and as a foundation for more sophisticated allocators.</p>
 
-<hr />
+<hr>
 
 <h2 id="table-of-contents">Table of Contents</h2>
 
@@ -21,14 +330,21 @@
   <li><a href="#architectural-overview">Architectural Overview</a></li>
   <li><a href="#core-data-structures">Core Data Structures</a></li>
   <li><a href="#memory-management-strategies">Memory Management Strategies</a></li>
-  <li><a href="#implementation-deep-dive">Implementation Deep Dive</a>
+  <li>
+<a href="#implementation-deep-dive">Implementation Deep Dive</a>
     <ul>
-      <li>6.1 <a href="#block-metadata-design">Block Metadata Design</a></li>
-      <li>6.2 <a href="#arena-based-concurrency">Arena-Based Concurrency</a></li>
-      <li>6.3 <a href="#allocation-algorithm">Allocation Algorithm</a></li>
-      <li>6.4 <a href="#deallocation--coalescing">Deallocation &amp; Coalescing</a></li>
-      <li>6.5 <a href="#large-block-handling">Large Block Handling</a></li>
-      <li>6.6 <a href="#memory-alignment">Memory Alignment</a></li>
+      <li>6.1 <a href="#block-metadata-design">Block Metadata Design</a>
+</li>
+      <li>6.2 <a href="#arena-based-concurrency">Arena-Based Concurrency</a>
+</li>
+      <li>6.3 <a href="#allocation-algorithm">Allocation Algorithm</a>
+</li>
+      <li>6.4 <a href="#deallocation--coalescing">Deallocation &amp; Coalescing</a>
+</li>
+      <li>6.5 <a href="#large-block-handling">Large Block Handling</a>
+</li>
+      <li>6.6 <a href="#memory-alignment">Memory Alignment</a>
+</li>
     </ul>
   </li>
   <li><a href="#thread-safety-analysis">Thread Safety Analysis</a></li>
@@ -41,17 +357,21 @@
   <li><a href="#conclusion">Conclusion</a></li>
 </ol>
 
-<hr />
+<hr>
 
 <h2 id="1-introduction--motivation">1. Introduction &amp; Motivation</h2>
 
 <p>Memory allocation is a fundamental operation in systems programming, yet most developers treat malloc/free as black boxes. Understanding allocator internals is crucial for:</p>
 
 <ul>
-  <li><strong>Performance optimization</strong>: Knowing how allocators work helps write allocation-friendly code</li>
-  <li><strong>Debugging memory issues</strong>: Understanding heap layout aids in diagnosing corruption</li>
-  <li><strong>System design</strong>: Custom allocators can improve performance for specific workloads</li>
-  <li><strong>Educational value</strong>: Allocators demonstrate key OS concepts (virtual memory, concurrency)</li>
+  <li>
+<strong>Performance optimization</strong>: Knowing how allocators work helps write allocation-friendly code</li>
+  <li>
+<strong>Debugging memory issues</strong>: Understanding heap layout aids in diagnosing corruption</li>
+  <li>
+<strong>System design</strong>: Custom allocators can improve performance for specific workloads</li>
+  <li>
+<strong>Educational value</strong>: Allocators demonstrate key OS concepts (virtual memory, concurrency)</li>
 </ul>
 
 <p><strong>mini_malloc</strong> was born from the need for a readable, yet functional allocator that could serve as both a learning tool and a practical implementation for constrained environments.</p>
@@ -74,22 +394,28 @@
   <li>Balance between simplicity and functionality</li>
 </ul>
 
-<hr />
+<hr>
 
 <h2 id="2-requirements-analysis">2. Requirements Analysis</h2>
 
 <h3 id="functional-requirements">Functional Requirements</h3>
 
 <ol>
-  <li><strong>Standard Interface Compliance</strong>
+  <li>
+<strong>Standard Interface Compliance</strong>
     <ul>
-      <li><code class="language-plaintext highlighter-rouge">malloc(size_t size)</code> - Allocate memory</li>
-      <li><code class="language-plaintext highlighter-rouge">free(void *ptr)</code> - Deallocate memory</li>
-      <li><code class="language-plaintext highlighter-rouge">realloc(void *ptr, size_t size)</code> - Resize allocation</li>
-      <li><code class="language-plaintext highlighter-rouge">calloc(size_t nmemb, size_t size)</code> - Allocate zeroed memory</li>
+      <li>
+<code class="language-plaintext highlighter-rouge">malloc(size_t size)</code> - Allocate memory</li>
+      <li>
+<code class="language-plaintext highlighter-rouge">free(void *ptr)</code> - Deallocate memory</li>
+      <li>
+<code class="language-plaintext highlighter-rouge">realloc(void *ptr, size_t size)</code> - Resize allocation</li>
+      <li>
+<code class="language-plaintext highlighter-rouge">calloc(size_t nmemb, size_t size)</code> - Allocate zeroed memory</li>
     </ul>
   </li>
-  <li><strong>Memory Management</strong>
+  <li>
+<strong>Memory Management</strong>
     <ul>
       <li>Handle arbitrary allocation sizes</li>
       <li>Support both small and large allocations efficiently</li>
@@ -97,7 +423,8 @@
       <li>Return memory to OS when possible</li>
     </ul>
   </li>
-  <li><strong>Thread Safety</strong>
+  <li>
+<strong>Thread Safety</strong>
     <ul>
       <li>Support concurrent allocation/deallocation</li>
       <li>Minimize lock contention</li>
@@ -109,21 +436,24 @@
 <h3 id="non-functional-requirements">Non-Functional Requirements</h3>
 
 <ol>
-  <li><strong>Performance</strong>
+  <li>
+<strong>Performance</strong>
     <ul>
       <li>O(1) allocation for common cases</li>
       <li>Reasonable worst-case performance</li>
       <li>Low memory overhead</li>
     </ul>
   </li>
-  <li><strong>Reliability</strong>
+  <li>
+<strong>Reliability</strong>
     <ul>
       <li>Detect common programming errors</li>
       <li>Provide debugging facilities</li>
       <li>Fail gracefully on resource exhaustion</li>
     </ul>
   </li>
-  <li><strong>Maintainability</strong>
+  <li>
+<strong>Maintainability</strong>
     <ul>
       <li>Clear, documented code</li>
       <li>Modular architecture</li>
@@ -135,13 +465,17 @@
 <h3 id="design-constraints">Design Constraints</h3>
 
 <ol>
-  <li><strong>Code Size</strong>: Under 800 lines for core implementation</li>
-  <li><strong>Dependencies</strong>: Only POSIX system calls (sbrk, mmap, pthread)</li>
-  <li><strong>Portability</strong>: 32/64-bit clean, endian-neutral</li>
-  <li><strong>Memory Overhead</strong>: Reasonable metadata size per allocation</li>
+  <li>
+<strong>Code Size</strong>: Under 800 lines for core implementation</li>
+  <li>
+<strong>Dependencies</strong>: Only POSIX system calls (sbrk, mmap, pthread)</li>
+  <li>
+<strong>Portability</strong>: 32/64-bit clean, endian-neutral</li>
+  <li>
+<strong>Memory Overhead</strong>: Reasonable metadata size per allocation</li>
 </ol>
 
-<hr />
+<hr>
 
 <h2 id="3-architectural-overview">3. Architectural Overview</h2>
 
@@ -172,14 +506,19 @@
 <h3 id="component-responsibilities">Component Responsibilities</h3>
 
 <ol>
-  <li><strong>API Layer</strong>: Implements standard malloc interface</li>
-  <li><strong>Arena Manager</strong>: Maps threads to arenas, reduces contention</li>
-  <li><strong>Free List Manager</strong>: Tracks available blocks per arena</li>
-  <li><strong>Memory Backend</strong>: Interfaces with OS for memory acquisition</li>
-  <li><strong>Debug Subsystem</strong>: Validation and corruption detection</li>
+  <li>
+<strong>API Layer</strong>: Implements standard malloc interface</li>
+  <li>
+<strong>Arena Manager</strong>: Maps threads to arenas, reduces contention</li>
+  <li>
+<strong>Free List Manager</strong>: Tracks available blocks per arena</li>
+  <li>
+<strong>Memory Backend</strong>: Interfaces with OS for memory acquisition</li>
+  <li>
+<strong>Debug Subsystem</strong>: Validation and corruption detection</li>
 </ol>
 
-<hr />
+<hr>
 
 <h2 id="4-core-data-structures">4. Core Data Structures</h2>
 
@@ -197,10 +536,14 @@
 
 <p><strong>Design Rationale:</strong></p>
 <ul>
-  <li><strong>Doubly-linked list</strong>: Enables O(1) removal during coalescing</li>
-  <li><strong>Explicit free flag</strong>: Simplifies corruption detection</li>
-  <li><strong>Arena index</strong>: Allows block to find its owning arena</li>
-  <li><strong>mmap flag</strong>: Different deallocation path for large blocks</li>
+  <li>
+<strong>Doubly-linked list</strong>: Enables O(1) removal during coalescing</li>
+  <li>
+<strong>Explicit free flag</strong>: Simplifies corruption detection</li>
+  <li>
+<strong>Arena index</strong>: Allows block to find its owning arena</li>
+  <li>
+<strong>mmap flag</strong>: Different deallocation path for large blocks</li>
 </ul>
 
 <h3 id="arena-structure">Arena Structure</h3>
@@ -215,9 +558,12 @@
 
 <p><strong>Design Choices:</strong></p>
 <ul>
-  <li><strong>Fixed arena count</strong>: Simplifies implementation, predictable memory</li>
-  <li><strong>Per-arena locks</strong>: Reduces contention vs. global lock</li>
-  <li><strong>Simple free list</strong>: First-fit algorithm, easy to understand</li>
+  <li>
+<strong>Fixed arena count</strong>: Simplifies implementation, predictable memory</li>
+  <li>
+<strong>Per-arena locks</strong>: Reduces contention vs. global lock</li>
+  <li>
+<strong>Simple free list</strong>: First-fit algorithm, easy to understand</li>
 </ul>
 
 <h3 id="memory-layout">Memory Layout</h3>
@@ -229,7 +575,7 @@ Memory layout:  [block_meta][....user data....][block_meta][....user data....]
                      └── metadata (hidden)          └── next block
 </code></pre></div></div>
 
-<hr />
+<hr>
 
 <h2 id="5-memory-management-strategies">5. Memory Management Strategies</h2>
 
@@ -290,7 +636,7 @@ Memory layout:  [block_meta][....user data....][block_meta][....user data....]
   <li>Heap fragmentation prevention</li>
 </ul>
 
-<hr />
+<hr>
 
 <h2 id="6-implementation-deep-dive">6. Implementation Deep Dive</h2>
 
@@ -526,7 +872,7 @@ Memory layout:  [block_meta][....user data....][block_meta][....user data....]
   <li>Matches most production allocators</li>
 </ul>
 
-<hr />
+<hr>
 
 <h2 id="7-thread-safety-analysis">7. Thread Safety Analysis</h2>
 
@@ -597,7 +943,7 @@ Memory layout:  [block_meta][....user data....][block_meta][....user data....]
 
 <p>The key insight is that perfect thread safety doesn’t require perfect parallelism. By accepting some contention in exchange for simplicity and correctness, mini_malloc achieves practical multithreaded performance suitable for many applications.</p>
 
-<hr />
+<hr>
 
 <h2 id="8-performance-characteristics">8. Performance Characteristics</h2>
 
@@ -651,10 +997,14 @@ Memory layout:  [block_meta][....user data....][block_meta][....user data....]
 <h3 id="space-overhead">Space Overhead</h3>
 
 <ul>
-  <li><strong>Per allocation</strong>: sizeof(block_meta) ≈ 40-48 bytes</li>
-  <li><strong>Alignment waste</strong>: Average 4 bytes per allocation</li>
-  <li><strong>Arena overhead</strong>: 8 × sizeof(arena_t) ≈ 512 bytes</li>
-  <li><strong>Fragmentation</strong>: Depends on allocation pattern</li>
+  <li>
+<strong>Per allocation</strong>: sizeof(block_meta) ≈ 40-48 bytes</li>
+  <li>
+<strong>Alignment waste</strong>: Average 4 bytes per allocation</li>
+  <li>
+<strong>Arena overhead</strong>: 8 × sizeof(arena_t) ≈ 512 bytes</li>
+  <li>
+<strong>Fragmentation</strong>: Depends on allocation pattern</li>
 </ul>
 
 <h3 id="cache-behavior">Cache Behavior</h3>
@@ -721,35 +1071,39 @@ Memory layout:  [block_meta][....user data....][block_meta][....user data....]
   <li>Better scaling with thread count due to arena design</li>
 </ul>
 
-<hr />
+<hr>
 
 <h2 id="9-testing--validation">9. Testing &amp; Validation</h2>
 
 <h3 id="test-categories">Test Categories</h3>
 
 <ol>
-  <li><strong>Functional Tests</strong>
+  <li>
+<strong>Functional Tests</strong>
     <ul>
       <li>Basic allocation/deallocation</li>
       <li>Edge cases (zero size, NULL pointers)</li>
       <li>Standard compliance</li>
     </ul>
   </li>
-  <li><strong>Stress Tests</strong>
+  <li>
+<strong>Stress Tests</strong>
     <ul>
       <li>Random allocation patterns</li>
       <li>Memory exhaustion handling</li>
       <li>Long-running stability</li>
     </ul>
   </li>
-  <li><strong>Concurrency Tests</strong>
+  <li>
+<strong>Concurrency Tests</strong>
     <ul>
       <li>Multi-threaded allocation races</li>
       <li>Lock contention scenarios</li>
       <li>Memory consistency</li>
     </ul>
   </li>
-  <li><strong>Validation Tests</strong>
+  <li>
+<strong>Validation Tests</strong>
     <ul>
       <li>Heap corruption detection</li>
       <li>Memory leak detection</li>
@@ -783,30 +1137,36 @@ Memory layout:  [block_meta][....user data....][block_meta][....user data....]
 <h3 id="debug-features">Debug Features</h3>
 
 <ol>
-  <li><strong>Heap Validation</strong>
-    <div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="nf">mini_malloc_validate_heap</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
+  <li>
+<strong>Heap Validation</strong>
+    <div class="language-c highlighter-rouge">
+<div class="highlight"><pre class="highlight"><code><span class="kt">int</span> <span class="nf">mini_malloc_validate_heap</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
     <span class="c1">// Traverse all arenas</span>
     <span class="c1">// Check pointer consistency</span>
     <span class="c1">// Verify metadata integrity</span>
 <span class="p">}</span>
 </code></pre></div>    </div>
   </li>
-  <li><strong>Statistics Tracking</strong>
-    <div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">void</span> <span class="nf">mini_malloc_get_global_stats</span><span class="p">(...)</span> <span class="p">{</span>
+  <li>
+<strong>Statistics Tracking</strong>
+    <div class="language-c highlighter-rouge">
+<div class="highlight"><pre class="highlight"><code><span class="kt">void</span> <span class="nf">mini_malloc_get_global_stats</span><span class="p">(...)</span> <span class="p">{</span>
     <span class="c1">// Report allocation counts</span>
     <span class="c1">// Memory usage statistics</span>
     <span class="c1">// Fragmentation metrics</span>
 <span class="p">}</span>
 </code></pre></div>    </div>
   </li>
-  <li><strong>Debug Output</strong>
-    <div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">mini_malloc_enable_debug</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+  <li>
+<strong>Debug Output</strong>
+    <div class="language-c highlighter-rouge">
+<div class="highlight"><pre class="highlight"><code><span class="n">mini_malloc_enable_debug</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
 <span class="c1">// Enables detailed operation logging</span>
 </code></pre></div>    </div>
   </li>
 </ol>
 
-<hr />
+<hr>
 
 <h2 id="10-real-world-considerations">10. Real-World Considerations</h2>
 
@@ -868,7 +1228,7 @@ Memory layout:  [block_meta][....user data....][block_meta][....user data....]
   <li>No virtual memory</li>
 </ul>
 
-<hr />
+<hr>
 
 <h2 id="11-comparison-with-production-allocators">11. Comparison with Production Allocators</h2>
 
@@ -960,26 +1320,31 @@ Memory layout:  [block_meta][....user data....][block_meta][....user data....]
   <li>Google-scale optimizations</li>
 </ul>
 
-<hr />
+<hr>
 
 <h2 id="12-future-enhancements">12. Future Enhancements</h2>
 
 <h3 id="performance-improvements">Performance Improvements</h3>
 
 <ol>
-  <li><strong>Segregated Free Lists</strong>
-    <div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Bins for common sizes</span>
+  <li>
+<strong>Segregated Free Lists</strong>
+    <div class="language-c highlighter-rouge">
+<div class="highlight"><pre class="highlight"><code><span class="c1">// Bins for common sizes</span>
 <span class="k">static</span> <span class="n">block_meta</span> <span class="o">*</span><span class="n">size_bins</span><span class="p">[</span><span class="mi">32</span><span class="p">];</span>  <span class="c1">// 8, 16, 24, ... 256</span>
 </code></pre></div>    </div>
   </li>
-  <li><strong>Thread-Local Caching</strong>
-    <div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kr">__thread</span> <span class="n">cache_t</span> <span class="n">local_cache</span> <span class="o">=</span> <span class="p">{</span>
+  <li>
+<strong>Thread-Local Caching</strong>
+    <div class="language-c highlighter-rouge">
+<div class="highlight"><pre class="highlight"><code><span class="kr">__thread</span> <span class="n">cache_t</span> <span class="n">local_cache</span> <span class="o">=</span> <span class="p">{</span>
     <span class="p">.</span><span class="n">small_blocks</span> <span class="o">=</span> <span class="p">{</span> <span class="nb">NULL</span> <span class="p">},</span>
     <span class="p">.</span><span class="n">bytes_cached</span> <span class="o">=</span> <span class="mi">0</span>
 <span class="p">};</span>
 </code></pre></div>    </div>
   </li>
-  <li><strong>Better Size Classes</strong>
+  <li>
+<strong>Better Size Classes</strong>
     <ul>
       <li>Reduce internal fragmentation</li>
       <li>Optimize for common allocation sizes</li>
@@ -991,21 +1356,24 @@ Memory layout:  [block_meta][....user data....][block_meta][....user data....]
 <h3 id="feature-additions">Feature Additions</h3>
 
 <ol>
-  <li><strong>Memory Profiling</strong>
+  <li>
+<strong>Memory Profiling</strong>
     <ul>
       <li>Allocation call stacks</li>
       <li>Heap usage over time</li>
       <li>Fragmentation analysis</li>
     </ul>
   </li>
-  <li><strong>Debug Enhancements</strong>
+  <li>
+<strong>Debug Enhancements</strong>
     <ul>
       <li>Red zones for overflow detection</li>
       <li>Allocation/free history</li>
       <li>Leak detection at exit</li>
     </ul>
   </li>
-  <li><strong>OS Integration</strong>
+  <li>
+<strong>OS Integration</strong>
     <ul>
       <li>madvise() for unused pages</li>
       <li>Huge page support</li>
@@ -1017,14 +1385,16 @@ Memory layout:  [block_meta][....user data....][block_meta][....user data....]
 <h3 id="algorithmic-improvements">Algorithmic Improvements</h3>
 
 <ol>
-  <li><strong>Coalescing Optimization</strong>
+  <li>
+<strong>Coalescing Optimization</strong>
     <ul>
       <li>Deferred coalescing</li>
       <li>Buddy system for power-of-2 sizes</li>
       <li>Skip lists for O(log n) search</li>
     </ul>
   </li>
-  <li><strong>Lock-Free Operations</strong>
+  <li>
+<strong>Lock-Free Operations</strong>
     <ul>
       <li>CAS-based free list updates</li>
       <li>Hazard pointers for safe traversal</li>
@@ -1033,28 +1403,31 @@ Memory layout:  [block_meta][....user data....][block_meta][....user data....]
   </li>
 </ol>
 
-<hr />
+<hr>
 
 <h2 id="13-lessons-learned">13. Lessons Learned</h2>
 
 <h3 id="design-insights">Design Insights</h3>
 
 <ol>
-  <li><strong>Simplicity Has Value</strong>
+  <li>
+<strong>Simplicity Has Value</strong>
     <ul>
       <li>Clear code enables understanding</li>
       <li>Simple algorithms often sufficient</li>
       <li>Optimization can come later</li>
     </ul>
   </li>
-  <li><strong>Concurrency Is Complex</strong>
+  <li>
+<strong>Concurrency Is Complex</strong>
     <ul>
       <li>Even simple locking has subtleties</li>
       <li>Performance testing essential</li>
       <li>Arena design effective for scaling</li>
     </ul>
   </li>
-  <li><strong>Testing Is Crucial</strong>
+  <li>
+<strong>Testing Is Crucial</strong>
     <ul>
       <li>Allocators have complex invariants</li>
       <li>Concurrent testing finds real bugs</li>
@@ -1066,21 +1439,24 @@ Memory layout:  [block_meta][....user data....][block_meta][....user data....]
 <h3 id="implementation-challenges">Implementation Challenges</h3>
 
 <ol>
-  <li><strong>Metadata Corruption</strong>
+  <li>
+<strong>Metadata Corruption</strong>
     <ul>
       <li>Major source of bugs</li>
       <li>Validation essential</li>
       <li>Consider out-of-band storage</li>
     </ul>
   </li>
-  <li><strong>Fragmentation Control</strong>
+  <li>
+<strong>Fragmentation Control</strong>
     <ul>
       <li>First-fit reasonable but not optimal</li>
       <li>Coalescing policy matters</li>
       <li>Size classes help significantly</li>
     </ul>
   </li>
-  <li><strong>Platform Differences</strong>
+  <li>
+<strong>Platform Differences</strong>
     <ul>
       <li>sbrk() not portable</li>
       <li>Page sizes vary</li>
@@ -1107,7 +1483,7 @@ Memory layout:  [block_meta][....user data....][block_meta][....user data....]
   <li>Platform abstraction</li>
 </ul>
 
-<hr />
+<hr>
 
 <h2 id="14-path-to-production-whats-missing-and-why">14. Path to Production: What’s Missing and Why</h2>
 
@@ -1191,19 +1567,21 @@ Memory layout:  [block_meta][....user data....][block_meta][....user data....]
 
 <p>The journey from basic memory management to production-ready allocation strategies illustrates a fundamental truth about software engineering: understanding why systems are built a certain way is just as important as understanding how they work. Through mini_malloc, we’ve explored both dimensions, creating not just a functional allocator but a foundation for deeper understanding of systems programming.</p>
 
-<hr />
+<hr>
 
 <h2 id="references-and-further-reading">References and Further Reading</h2>
 
 <ol>
-  <li><strong>Classic Papers</strong>
+  <li>
+<strong>Classic Papers</strong>
     <ul>
       <li>“Dynamic Storage Allocation: A Survey and Critical Review” - Wilson et al.</li>
       <li>“The Memory Fragmentation Problem: Solved?” - Johnstone &amp; Wilson</li>
       <li>“Hoard: A Scalable Memory Allocator” - Berger et al.</li>
     </ul>
   </li>
-  <li><strong>Implementation References</strong>
+  <li>
+<strong>Implementation References</strong>
     <ul>
       <li>Doug Lea’s malloc (dlmalloc)</li>
       <li>GNU libc malloc (ptmalloc2)</li>
@@ -1211,14 +1589,16 @@ Memory layout:  [block_meta][....user data....][block_meta][....user data....]
       <li>tcmalloc design document</li>
     </ul>
   </li>
-  <li><strong>Books</strong>
+  <li>
+<strong>Books</strong>
     <ul>
       <li>“The Art of Computer Programming, Vol. 1” - Knuth (Section 2.5)</li>
       <li>“Advanced Programming in the UNIX Environment” - Stevens</li>
       <li>“Computer Systems: A Programmer’s Perspective” - Bryant &amp; O’Hallaron</li>
     </ul>
   </li>
-  <li><strong>Online Resources</strong>
+  <li>
+<strong>Online Resources</strong>
     <ul>
       <li>Memory Management Reference (www.memorymanagement.org)</li>
       <li>Malloc Tutorial (danluu.com)</li>
@@ -1227,7 +1607,7 @@ Memory layout:  [block_meta][....user data....][block_meta][....user data....]
   </li>
 </ol>
 
-<hr />
+<hr>
 
 <h2 id="appendix-a-comprehensive-test-suite">Appendix A: Comprehensive Test Suite</h2>
 
@@ -3466,732 +3846,172 @@ Success rate: 100.0%
 
 </code></pre>
 
-<p><em>End of Document</em></p>]]></content><author><name></name></author><category term="computer-sciences" /><category term="operating_systems" /><category term="concurrent" /><category term="c/c++" /><category term="ds-and-algorithms" /><summary type="html"><![CDATA[This document provides an in-depth look at the design and implementation of **mini_malloc**, a small, first-fit, thread-safe memory allocator in C. It covers the allocator’s architecture, data structures, algorithms, debugging facilities, and testing strategy.]]></summary></entry><entry><title type="html">Modern Concurrent Red-Black Tree Design in C++: A Practical Guide - Part 1</title><link href="http://localhost:4000/blog/2025/conrbtree/" rel="alternate" type="text/html" title="Modern Concurrent Red-Black Tree Design in C++: A Practical Guide - Part 1" /><published>2025-06-06T12:09:00-04:00</published><updated>2025-06-06T12:09:00-04:00</updated><id>http://localhost:4000/blog/2025/conrbtree</id><content type="html" xml:base="http://localhost:4000/blog/2025/conrbtree/"><![CDATA[<h2 id="introduction">Introduction</h2>
+<p><em>End of Document</em></p>
 
-<p>Red-Black Trees (RB-Trees) offer guaranteed $O(\log n)$ operations in single-threaded contexts. However, as soon as multiple threads try to query or modify the same tree concurrently, a naive implementation suffers from severe contention and potential deadlocks. In this post, we share a <strong>modest</strong> approach, neither world-beating nor lock-free—to transform a standard RB-Tree into a <strong>thread-safe</strong> data structure in C++. We will:</p>
+    </div>
+  </article>
 
-<ol>
-  <li>Present our <strong>node layout</strong> and sentinel (<code class="language-plaintext highlighter-rouge">NIL</code>) design.</li>
-  <li>Describe <strong>three reader synchronization strategies</strong>:
-    <ul>
-      <li>Simple Serialization</li>
-      <li>Lock Coupling</li>
-      <li>Global Reader-Writer Lock</li>
-    </ul>
+  
+
+  
+
+  
+    
+      
+
+  
+    
+    <br>
+    <hr>
+    <br>
+    <ul class="list-disc pl-8"></ul>
+
+    <!-- Adds related posts to the end of an article -->
+    <h2 class="text-3xl font-semibold mb-4 mt-12">Enjoy Reading This Article?</h2>
+    <p class="mb-2">Here are some more articles you might like to read next:</p>
+  
+
+  <li class="my-2">
+    
+      <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/conrbtree/">Modern Concurrent Red-Black Tree Design in C++: A Practical Guide - Part 1</a>
+    
   </li>
-  <li>Show the <strong>core insertion and deletion</strong> code under writer serialization.
-    <ul>
-      <li><strong>New:</strong> Include “flow-charts” illustrating how insert and delete steps happen under concurrency.</li>
-    </ul>
-  </li>
-  <li>Highlight a key portion of <strong>delete fixup</strong> with an diagram.</li>
-</ol>
-
-<p>Our goal is to share <strong>ideas</strong>, not claim ultimate performance. If you need maximum scalability, consider a lock-free skip list or a B-Tree with fine-grained latches. But if you already know RB-Trees and want a straightforward concurrency-safe version, read on.</p>
-
-<hr />
-
-<h2 id="1-data-structures--core-design">1. Data Structures &amp; Core Design</h2>
-
-<h3 id="11-node-layout">1.1 Node Layout</h3>
-
-<p>Each node holds:</p>
-<ul>
-  <li><code class="language-plaintext highlighter-rouge">key</code> and <code class="language-plaintext highlighter-rouge">value</code></li>
-  <li>A <code class="language-plaintext highlighter-rouge">Color</code> (RED or BLACK)</li>
-  <li>Pointers <code class="language-plaintext highlighter-rouge">parent</code>, <code class="language-plaintext highlighter-rouge">left</code>, <code class="language-plaintext highlighter-rouge">right</code></li>
-  <li>A per-node <code class="language-plaintext highlighter-rouge">std::shared_mutex rw</code> for reader-writer locking</li>
-  <li>A unique <code class="language-plaintext highlighter-rouge">lock_id</code> (the node’s memory address) to enforce a consistent lock acquisition order</li>
-</ul>
-
-<div class="language-c++ highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">enum</span> <span class="k">class</span> <span class="nc">Color</span> <span class="o">:</span> <span class="kt">uint8_t</span> <span class="p">{</span>
-    <span class="n">RED</span><span class="p">,</span>
-    <span class="n">BLACK</span>
-<span class="p">};</span>
-
-<span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="nc">K</span><span class="p">,</span> <span class="k">typename</span> <span class="nc">V</span><span class="p">&gt;</span>
-<span class="k">struct</span> <span class="nc">Node</span> <span class="p">{</span>
-    <span class="n">K</span> <span class="n">key</span><span class="p">;</span>
-    <span class="n">V</span> <span class="n">val</span><span class="p">;</span>
-    <span class="n">Color</span> <span class="n">color</span><span class="p">{</span> <span class="n">Color</span><span class="o">::</span><span class="n">RED</span> <span class="p">};</span>
-
-    <span class="n">Node</span> <span class="o">*</span><span class="n">parent</span><span class="p">{</span> <span class="nb">nullptr</span> <span class="p">};</span>
-    <span class="n">Node</span> <span class="o">*</span><span class="n">left</span><span class="p">{</span> <span class="nb">nullptr</span> <span class="p">};</span>
-    <span class="n">Node</span> <span class="o">*</span><span class="n">right</span><span class="p">{</span> <span class="nb">nullptr</span> <span class="p">};</span>
-
-    <span class="k">mutable</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_mutex</span> <span class="n">rw</span><span class="p">;</span>   <span class="c1">// Shared for readers, exclusive for writers</span>
-    <span class="k">const</span> <span class="kt">uintptr_t</span> <span class="n">lock_id</span><span class="p">;</span>        <span class="c1">// Based on 'this'; prevents deadlocks in lock coupling</span>
-
-    <span class="k">explicit</span> <span class="nf">Node</span><span class="p">(</span><span class="k">const</span> <span class="n">K</span> <span class="o">&amp;</span><span class="n">k</span><span class="p">,</span> <span class="k">const</span> <span class="n">V</span> <span class="o">&amp;</span><span class="n">v</span><span class="p">,</span> <span class="n">Color</span> <span class="n">c</span> <span class="o">=</span> <span class="n">Color</span><span class="o">::</span><span class="n">RED</span><span class="p">)</span>
-        <span class="o">:</span> <span class="n">key</span><span class="p">(</span><span class="n">k</span><span class="p">),</span> <span class="n">val</span><span class="p">(</span><span class="n">v</span><span class="p">),</span> <span class="n">color</span><span class="p">(</span><span class="n">c</span><span class="p">),</span>
-          <span class="n">lock_id</span><span class="p">(</span><span class="k">reinterpret_cast</span><span class="o">&lt;</span><span class="kt">uintptr_t</span><span class="o">&gt;</span><span class="p">(</span><span class="k">this</span><span class="p">))</span> <span class="p">{}</span>
-<span class="p">};</span>
-</code></pre></div></div>
-
-<ul>
-  <li><strong>Why <code class="language-plaintext highlighter-rouge">std::shared_mutex</code>?</strong>
-It allows multiple concurrent readers while still ensuring exclusive access for writers.</li>
-  <li><strong>Why <code class="language-plaintext highlighter-rouge">lock_id</code>?</strong>
-When two threads attempt to acquire locks on adjacent nodes (parent and child) in opposite orders, a deadlock can occur. We break cycles by sorting the two <code class="language-plaintext highlighter-rouge">lock_id</code>s and acquiring locks in ascending order.</li>
-</ul>
-
-<h3 id="12-the-nil-sentinel">1.2 The <code class="language-plaintext highlighter-rouge">NIL</code> Sentinel</h3>
-
-<p>Instead of <code class="language-plaintext highlighter-rouge">nullptr</code> for missing children, we maintain a <strong>single shared</strong> <code class="language-plaintext highlighter-rouge">NIL</code> node:</p>
-
-<div class="language-c++ highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="nc">K</span><span class="p">,</span> <span class="k">typename</span> <span class="nc">V</span><span class="p">,</span> <span class="k">typename</span> <span class="nc">Compare</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">less</span><span class="o">&lt;</span><span class="n">K</span><span class="p">&gt;</span><span class="o">&gt;</span>
-<span class="k">class</span> <span class="nc">RBTree</span> <span class="p">{</span>
-<span class="nl">public:</span>
-    <span class="k">using</span> <span class="n">NodeT</span> <span class="o">=</span> <span class="n">Node</span><span class="o">&lt;</span><span class="n">K</span><span class="p">,</span> <span class="n">V</span><span class="o">&gt;</span><span class="p">;</span>
-
-    <span class="n">RBTree</span><span class="p">()</span> <span class="p">{</span>
-        <span class="c1">// Create one BLACK sentinel for all leaves</span>
-        <span class="n">NIL</span> <span class="o">=</span> <span class="k">new</span> <span class="n">NodeT</span><span class="p">(</span><span class="n">K</span><span class="p">{},</span> <span class="n">V</span><span class="p">{},</span> <span class="n">Color</span><span class="o">::</span><span class="n">BLACK</span><span class="p">);</span>
-        <span class="n">NIL</span><span class="o">-&gt;</span><span class="n">left</span>   <span class="o">=</span> <span class="n">NIL</span><span class="p">;</span>
-        <span class="n">NIL</span><span class="o">-&gt;</span><span class="n">right</span>  <span class="o">=</span> <span class="n">NIL</span><span class="p">;</span>
-        <span class="n">NIL</span><span class="o">-&gt;</span><span class="n">parent</span> <span class="o">=</span> <span class="n">NIL</span><span class="p">;</span>
-        <span class="n">root</span> <span class="o">=</span> <span class="n">NIL</span><span class="p">;</span>
-    <span class="p">}</span>
-
-    <span class="o">~</span><span class="n">RBTree</span><span class="p">()</span> <span class="p">{</span>
-        <span class="n">destroy_rec</span><span class="p">(</span><span class="n">root</span><span class="p">);</span>
-        <span class="k">delete</span> <span class="n">NIL</span><span class="p">;</span>
-    <span class="p">}</span>
-
-<span class="k">private</span><span class="o">:</span>
-    <span class="n">NodeT</span> <span class="o">*</span><span class="n">root</span><span class="p">;</span>   <span class="c1">// Points to real root or NIL if empty</span>
-    <span class="n">NodeT</span> <span class="o">*</span><span class="n">NIL</span><span class="p">;</span>    <span class="c1">// Shared black sentinel</span>
-
-    <span class="kt">void</span> <span class="nf">destroy_rec</span><span class="p">(</span><span class="n">NodeT</span> <span class="o">*</span><span class="n">n</span><span class="p">)</span> <span class="p">{</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">n</span> <span class="o">==</span> <span class="n">NIL</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>
-        <span class="n">destroy_rec</span><span class="p">(</span><span class="n">n</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">);</span>
-        <span class="n">destroy_rec</span><span class="p">(</span><span class="n">n</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">);</span>
-        <span class="k">delete</span> <span class="n">n</span><span class="p">;</span>
-    <span class="p">}</span>
-    <span class="c1">// ...</span>
-<span class="p">};</span>
-</code></pre></div></div>
-
-<p><strong>Benefits of a sentinel:</strong></p>
-
-<ol>
-  <li><strong>Uniform traversal:</strong> Instead of <code class="language-plaintext highlighter-rouge">if (child != nullptr)</code>, we check <code class="language-plaintext highlighter-rouge">if (child != NIL)</code>.</li>
-  <li><strong>RB Invariant (#3):</strong> All leaf pointers reference a single black <code class="language-plaintext highlighter-rouge">NIL</code>, so every root-to-leaf path counts correctly.</li>
-  <li><strong>Rotation simplicity:</strong> We never have to handle <code class="language-plaintext highlighter-rouge">nullptr</code>; a child is either another node or the <code class="language-plaintext highlighter-rouge">NIL</code> sentinel.</li>
-</ol>
-
-<hr />
-
-<h2 id="2-three-concurrency-strategies-for-lookups">2. Three Concurrency Strategies for Lookups</h2>
-
-<p>Readers can run in parallel—or not—depending on how aggressively you lock. We offer <strong>three</strong> strategies, from simplest to more concurrent:</p>
-
-<ol>
-  <li><strong>Simple Serialization</strong> (<code class="language-plaintext highlighter-rouge">lookup_simple</code>)</li>
-  <li><strong>Lock Coupling</strong> (<code class="language-plaintext highlighter-rouge">lookup</code>)</li>
-  <li><strong>Global Reader-Writer Lock</strong> (<code class="language-plaintext highlighter-rouge">lookup_hybrid</code>)</li>
-</ol>
-
-<h3 id="21-strategy-1-simple-serialization-lookup_simple">2.1 Strategy 1: Simple Serialization (<code class="language-plaintext highlighter-rouge">lookup_simple</code>)</h3>
-
-<p>All readers and writers grab the same global <code class="language-plaintext highlighter-rouge">writers_mutex</code>. Under that lock, we perform a normal BST search. This ensures correctness and is trivial to implement, but there is <strong>no parallelism</strong> among readers.</p>
-
-<div class="language-c++ highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="nc">K</span><span class="p">,</span> <span class="k">typename</span> <span class="nc">V</span><span class="p">,</span> <span class="k">typename</span> <span class="nc">Compare</span><span class="p">&gt;</span>
-<span class="k">class</span> <span class="nc">RBTree</span> <span class="p">{</span>
-<span class="nl">public:</span>
-    <span class="k">mutable</span> <span class="n">std</span><span class="o">::</span><span class="n">mutex</span> <span class="n">writers_mutex</span><span class="p">;</span>
-
-    <span class="n">std</span><span class="o">::</span><span class="n">optional</span><span class="o">&lt;</span><span class="n">V</span><span class="o">&gt;</span> <span class="n">lookup_simple</span><span class="p">(</span><span class="k">const</span> <span class="n">K</span> <span class="o">&amp;</span><span class="n">k</span><span class="p">)</span> <span class="k">const</span> <span class="p">{</span>
-        <span class="c1">// 1. Lock the global mutex (blocks other readers &amp; writers)</span>
-        <span class="n">std</span><span class="o">::</span><span class="n">lock_guard</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">mutex</span><span class="o">&gt;</span> <span class="n">guard</span><span class="p">(</span><span class="n">writers_mutex</span><span class="p">);</span>
-
-        <span class="c1">// 2. Standard BST traversal under the lock</span>
-        <span class="k">const</span> <span class="n">NodeT</span> <span class="o">*</span><span class="n">curr</span> <span class="o">=</span> <span class="n">root</span><span class="p">;</span>
-        <span class="k">while</span> <span class="p">(</span><span class="n">curr</span> <span class="o">!=</span> <span class="n">NIL</span><span class="p">)</span> <span class="p">{</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">Compare</span><span class="p">{}(</span><span class="n">k</span><span class="p">,</span> <span class="n">curr</span><span class="o">-&gt;</span><span class="n">key</span><span class="p">))</span> <span class="p">{</span>
-                <span class="n">curr</span> <span class="o">=</span> <span class="n">curr</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">;</span>
-            <span class="p">}</span>
-            <span class="k">else</span> <span class="nf">if</span> <span class="p">(</span><span class="n">Compare</span><span class="p">{}(</span><span class="n">curr</span><span class="o">-&gt;</span><span class="n">key</span><span class="p">,</span> <span class="n">k</span><span class="p">))</span> <span class="p">{</span>
-                <span class="n">curr</span> <span class="o">=</span> <span class="n">curr</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">;</span>
-            <span class="p">}</span>
-            <span class="k">else</span> <span class="p">{</span>
-                <span class="k">return</span> <span class="n">curr</span><span class="o">-&gt;</span><span class="n">val</span><span class="p">;</span> <span class="c1">// Found</span>
-            <span class="p">}</span>
-        <span class="p">}</span>
-        <span class="k">return</span> <span class="n">std</span><span class="o">::</span><span class="n">nullopt</span><span class="p">;</span> <span class="c1">// Not found</span>
-    <span class="p">}</span>
-    <span class="c1">// ...</span>
-<span class="p">};</span>
-</code></pre></div></div>
-
-<p><strong>Pros:</strong></p>
-
-<ul>
-  <li>Deadlock-free and straightforward.</li>
-  <li>Under heavy write contention, per-node locking overhead can be higher anyway, so this may be simpler.</li>
-</ul>
-
-<p><strong>Cons:</strong></p>
-
-<ul>
-  <li>No simultaneous readers: everything serializes.</li>
-</ul>
-
-<p>Use this when simplicity or moderate concurrency is acceptable.</p>
-
-<hr />
-
-<h3 id="22-strategy-2-lock-coupling-lookup">2.2 Strategy 2: Lock Coupling (<code class="language-plaintext highlighter-rouge">lookup</code>)</h3>
-
-<p>Also known as “hand-over-hand locking.” A reader holds a shared lock on the current node. Before moving to a child, it acquires the child’s shared lock, then releases the parent. This way, readers in different subtrees do not contend for the same locks.</p>
-
-<div class="language-c++ highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="nc">K</span><span class="p">,</span> <span class="k">typename</span> <span class="nc">V</span><span class="p">,</span> <span class="k">typename</span> <span class="nc">Compare</span><span class="p">&gt;</span>
-<span class="k">class</span> <span class="nc">RBTree</span> <span class="p">{</span>
-<span class="nl">public:</span>
-    <span class="n">std</span><span class="o">::</span><span class="n">optional</span><span class="o">&lt;</span><span class="n">V</span><span class="o">&gt;</span> <span class="n">lookup</span><span class="p">(</span><span class="k">const</span> <span class="n">K</span> <span class="o">&amp;</span><span class="n">k</span><span class="p">)</span> <span class="k">const</span> <span class="p">{</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">root</span> <span class="o">==</span> <span class="n">NIL</span><span class="p">)</span> <span class="k">return</span> <span class="n">std</span><span class="o">::</span><span class="n">nullopt</span><span class="p">;</span>
-
-        <span class="c1">// 1. Start by grabbing a shared lock on root.</span>
-        <span class="n">std</span><span class="o">::</span><span class="n">shared_lock</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">shared_mutex</span><span class="o">&gt;</span> <span class="n">curr_lock</span><span class="p">(</span><span class="n">root</span><span class="o">-&gt;</span><span class="n">rw</span><span class="p">);</span>
-        <span class="k">const</span> <span class="n">NodeT</span> <span class="o">*</span><span class="n">curr</span> <span class="o">=</span> <span class="n">root</span><span class="p">;</span>
-
-        <span class="k">while</span> <span class="p">(</span><span class="n">curr</span> <span class="o">!=</span> <span class="n">NIL</span><span class="p">)</span> <span class="p">{</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">Compare</span><span class="p">{}(</span><span class="n">k</span><span class="p">,</span> <span class="n">curr</span><span class="o">-&gt;</span><span class="n">key</span><span class="p">))</span> <span class="p">{</span>
-                <span class="n">NodeT</span> <span class="o">*</span><span class="n">next</span> <span class="o">=</span> <span class="n">curr</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">;</span>
-                <span class="k">if</span> <span class="p">(</span><span class="n">next</span> <span class="o">==</span> <span class="n">NIL</span><span class="p">)</span> <span class="k">break</span><span class="p">;</span>
-
-                <span class="k">if</span> <span class="p">(</span><span class="n">curr</span><span class="o">-&gt;</span><span class="n">lock_id</span> <span class="o">&lt;</span> <span class="n">next</span><span class="o">-&gt;</span><span class="n">lock_id</span><span class="p">)</span> <span class="p">{</span>
-                    <span class="c1">// Safe: parent lock_id &lt; child lock_id</span>
-                    <span class="n">std</span><span class="o">::</span><span class="n">shared_lock</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">shared_mutex</span><span class="o">&gt;</span> <span class="n">next_lock</span><span class="p">(</span><span class="n">next</span><span class="o">-&gt;</span><span class="n">rw</span><span class="p">);</span>
-                    <span class="n">curr_lock</span><span class="p">.</span><span class="n">unlock</span><span class="p">();</span>
-                    <span class="n">curr</span> <span class="o">=</span> <span class="n">next</span><span class="p">;</span>
-                    <span class="n">curr_lock</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">next_lock</span><span class="p">);</span>
-                <span class="p">}</span>
-                <span class="k">else</span> <span class="p">{</span>
-                    <span class="c1">// Inverted order: parent-&gt;lock_id &gt; child-&gt;lock_id</span>
-                    <span class="c1">// Acquire both locks in ascending order to prevent deadlock.</span>
-                    <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">NodeT</span><span class="o">*&gt;</span> <span class="n">nodes</span> <span class="o">=</span> <span class="p">{</span>
-                        <span class="k">const_cast</span><span class="o">&lt;</span><span class="n">NodeT</span><span class="o">*&gt;</span><span class="p">(</span><span class="n">curr</span><span class="p">),</span>
-                        <span class="k">const_cast</span><span class="o">&lt;</span><span class="n">NodeT</span><span class="o">*&gt;</span><span class="p">(</span><span class="n">next</span><span class="p">)</span>
-                    <span class="p">};</span>
-                    <span class="n">OrderedLockGuard</span><span class="o">&lt;</span><span class="n">K</span><span class="p">,</span> <span class="n">V</span><span class="o">&gt;</span> <span class="n">guard</span><span class="p">(</span><span class="n">nodes</span><span class="p">);</span>
-                    <span class="n">curr_lock</span><span class="p">.</span><span class="n">unlock</span><span class="p">();</span>
-                    <span class="n">curr</span> <span class="o">=</span> <span class="n">next</span><span class="p">;</span>
-                    <span class="n">curr_lock</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_lock</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">shared_mutex</span><span class="o">&gt;</span><span class="p">(</span><span class="n">curr</span><span class="o">-&gt;</span><span class="n">rw</span><span class="p">);</span>
-                <span class="p">}</span>
-            <span class="p">}</span>
-            <span class="k">else</span> <span class="nf">if</span> <span class="p">(</span><span class="n">Compare</span><span class="p">{}(</span><span class="n">curr</span><span class="o">-&gt;</span><span class="n">key</span><span class="p">,</span> <span class="n">k</span><span class="p">))</span> <span class="p">{</span>
-                <span class="n">NodeT</span> <span class="o">*</span><span class="n">next</span> <span class="o">=</span> <span class="n">curr</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">;</span>
-                <span class="k">if</span> <span class="p">(</span><span class="n">next</span> <span class="o">==</span> <span class="n">NIL</span><span class="p">)</span> <span class="k">break</span><span class="p">;</span>
-
-                <span class="k">if</span> <span class="p">(</span><span class="n">curr</span><span class="o">-&gt;</span><span class="n">lock_id</span> <span class="o">&lt;</span> <span class="n">next</span><span class="o">-&gt;</span><span class="n">lock_id</span><span class="p">)</span> <span class="p">{</span>
-                    <span class="n">std</span><span class="o">::</span><span class="n">shared_lock</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">shared_mutex</span><span class="o">&gt;</span> <span class="n">next_lock</span><span class="p">(</span><span class="n">next</span><span class="o">-&gt;</span><span class="n">rw</span><span class="p">);</span>
-                    <span class="n">curr_lock</span><span class="p">.</span><span class="n">unlock</span><span class="p">();</span>
-                    <span class="n">curr</span> <span class="o">=</span> <span class="n">next</span><span class="p">;</span>
-                    <span class="n">curr_lock</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">move</span><span class="p">(</span><span class="n">next_lock</span><span class="p">);</span>
-                <span class="p">}</span>
-                <span class="k">else</span> <span class="p">{</span>
-                    <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">NodeT</span><span class="o">*&gt;</span> <span class="n">nodes</span> <span class="o">=</span> <span class="p">{</span>
-                        <span class="k">const_cast</span><span class="o">&lt;</span><span class="n">NodeT</span><span class="o">*&gt;</span><span class="p">(</span><span class="n">curr</span><span class="p">),</span>
-                        <span class="k">const_cast</span><span class="o">&lt;</span><span class="n">NodeT</span><span class="o">*&gt;</span><span class="p">(</span><span class="n">next</span><span class="p">)</span>
-                    <span class="p">};</span>
-                    <span class="n">OrderedLockGuard</span><span class="o">&lt;</span><span class="n">K</span><span class="p">,</span> <span class="n">V</span><span class="o">&gt;</span> <span class="n">guard</span><span class="p">(</span><span class="n">nodes</span><span class="p">);</span>
-                    <span class="n">curr_lock</span><span class="p">.</span><span class="n">unlock</span><span class="p">();</span>
-                    <span class="n">curr</span> <span class="o">=</span> <span class="n">next</span><span class="p">;</span>
-                    <span class="n">curr_lock</span> <span class="o">=</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_lock</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">shared_mutex</span><span class="o">&gt;</span><span class="p">(</span><span class="n">curr</span><span class="o">-&gt;</span><span class="n">rw</span><span class="p">);</span>
-                <span class="p">}</span>
-            <span class="p">}</span>
-            <span class="k">else</span> <span class="p">{</span>
-                <span class="c1">// Exact match</span>
-                <span class="k">return</span> <span class="n">curr</span><span class="o">-&gt;</span><span class="n">val</span><span class="p">;</span>
-            <span class="p">}</span>
-        <span class="p">}</span>
-        <span class="k">return</span> <span class="n">std</span><span class="o">::</span><span class="n">nullopt</span><span class="p">;</span>
-    <span class="p">}</span>
-    <span class="c1">// ...</span>
-<span class="p">};</span>
-</code></pre></div></div>
-
-<h4 id="orderedlockguard">OrderedLockGuard</h4>
-
-<div class="language-c++ highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="nc">K</span><span class="p">,</span> <span class="k">typename</span> <span class="nc">V</span><span class="p">&gt;</span>
-<span class="k">class</span> <span class="nc">OrderedLockGuard</span> <span class="p">{</span>
-<span class="nl">private:</span>
-    <span class="k">using</span> <span class="n">NodeT</span> <span class="o">=</span> <span class="n">Node</span><span class="o">&lt;</span><span class="n">K</span><span class="p">,</span> <span class="n">V</span><span class="o">&gt;</span><span class="p">;</span>
-    <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">shared_lock</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">shared_mutex</span><span class="o">&gt;&gt;</span> <span class="n">locks_</span><span class="p">;</span>
-
-<span class="nl">public:</span>
-    <span class="k">explicit</span> <span class="n">OrderedLockGuard</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">NodeT</span><span class="o">*&gt;</span> <span class="n">nodes</span><span class="p">)</span> <span class="p">{</span>
-        <span class="c1">// 1. Sort by lock_id ascending</span>
-        <span class="n">std</span><span class="o">::</span><span class="n">sort</span><span class="p">(</span><span class="n">nodes</span><span class="p">.</span><span class="n">begin</span><span class="p">(),</span> <span class="n">nodes</span><span class="p">.</span><span class="n">end</span><span class="p">(),</span>
-                  <span class="p">[](</span><span class="k">const</span> <span class="n">NodeT</span><span class="o">*</span> <span class="n">a</span><span class="p">,</span> <span class="k">const</span> <span class="n">NodeT</span><span class="o">*</span> <span class="n">b</span><span class="p">)</span> <span class="p">{</span>
-                      <span class="k">return</span> <span class="n">a</span><span class="o">-&gt;</span><span class="n">lock_id</span> <span class="o">&lt;</span> <span class="n">b</span><span class="o">-&gt;</span><span class="n">lock_id</span><span class="p">;</span>
-                  <span class="p">});</span>
-        <span class="n">nodes</span><span class="p">.</span><span class="n">erase</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">unique</span><span class="p">(</span><span class="n">nodes</span><span class="p">.</span><span class="n">begin</span><span class="p">(),</span> <span class="n">nodes</span><span class="p">.</span><span class="n">end</span><span class="p">()),</span> <span class="n">nodes</span><span class="p">.</span><span class="n">end</span><span class="p">());</span>
-
-        <span class="c1">// 2. Acquire shared_locks in sorted order</span>
-        <span class="n">locks_</span><span class="p">.</span><span class="n">reserve</span><span class="p">(</span><span class="n">nodes</span><span class="p">.</span><span class="n">size</span><span class="p">());</span>
-        <span class="k">for</span> <span class="p">(</span><span class="n">NodeT</span><span class="o">*</span> <span class="n">nd</span> <span class="o">:</span> <span class="n">nodes</span><span class="p">)</span> <span class="p">{</span>
-            <span class="n">locks_</span><span class="p">.</span><span class="n">emplace_back</span><span class="p">(</span><span class="n">nd</span><span class="o">-&gt;</span><span class="n">rw</span><span class="p">);</span>
-        <span class="p">}</span>
-    <span class="p">}</span>
-    <span class="c1">// Destructor releases all locks in reverse order (RAII).</span>
-<span class="p">};</span>
-</code></pre></div></div>
-
-<p><strong>Pros:</strong></p>
-
-<ul>
-  <li>Readers only contend when they actually traverse the same node.</li>
-  <li>Allows significant parallelism in read-heavy workloads.</li>
-</ul>
-
-<p><strong>Cons:</strong></p>
-
-<ul>
-  <li>Every step does at least one lock/unlock operation, plus potential <code class="language-plaintext highlighter-rouge">OrderedLockGuard</code> overhead.</li>
-  <li>Slightly more complex to implement and reason about.</li>
-</ul>
-
-<hr />
-
-<h3 id="23-strategy-3-global-reader-writer-lock-lookup_hybrid">2.3 Strategy 3: Global Reader-Writer Lock (<code class="language-plaintext highlighter-rouge">lookup_hybrid</code>)</h3>
-
-<p>Simplify further by using one global <code class="language-plaintext highlighter-rouge">std::shared_mutex</code>. Readers acquire a shared lock on the entire tree; writers acquire an exclusive lock. No per-node locking is needed during traversal.</p>
-
-<div class="language-c++ highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="nc">K</span><span class="p">,</span> <span class="k">typename</span> <span class="nc">V</span><span class="p">,</span> <span class="k">typename</span> <span class="nc">Compare</span><span class="p">&gt;</span>
-<span class="k">class</span> <span class="nc">RBTree</span> <span class="p">{</span>
-<span class="nl">public:</span>
-    <span class="k">mutable</span> <span class="n">std</span><span class="o">::</span><span class="n">shared_mutex</span> <span class="n">global_rw_lock</span><span class="p">;</span>
-
-    <span class="n">std</span><span class="o">::</span><span class="n">optional</span><span class="o">&lt;</span><span class="n">V</span><span class="o">&gt;</span> <span class="n">lookup_hybrid</span><span class="p">(</span><span class="k">const</span> <span class="n">K</span> <span class="o">&amp;</span><span class="n">k</span><span class="p">)</span> <span class="k">const</span> <span class="p">{</span>
-        <span class="c1">// 1. Grab a shared lock for all readers.</span>
-        <span class="n">std</span><span class="o">::</span><span class="n">shared_lock</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">shared_mutex</span><span class="o">&gt;</span> <span class="n">gl</span><span class="p">(</span><span class="n">global_rw_lock</span><span class="p">);</span>
-
-        <span class="c1">// 2. Plain BST traversal under that shared lock.</span>
-        <span class="k">const</span> <span class="n">NodeT</span> <span class="o">*</span><span class="n">curr</span> <span class="o">=</span> <span class="n">root</span><span class="p">;</span>
-        <span class="k">while</span> <span class="p">(</span><span class="n">curr</span> <span class="o">!=</span> <span class="n">NIL</span><span class="p">)</span> <span class="p">{</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">Compare</span><span class="p">{}(</span><span class="n">k</span><span class="p">,</span> <span class="n">curr</span><span class="o">-&gt;</span><span class="n">key</span><span class="p">))</span> <span class="p">{</span>
-                <span class="n">curr</span> <span class="o">=</span> <span class="n">curr</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">;</span>
-            <span class="p">}</span>
-            <span class="k">else</span> <span class="nf">if</span> <span class="p">(</span><span class="n">Compare</span><span class="p">{}(</span><span class="n">curr</span><span class="o">-&gt;</span><span class="n">key</span><span class="p">,</span> <span class="n">k</span><span class="p">))</span> <span class="p">{</span>
-                <span class="n">curr</span> <span class="o">=</span> <span class="n">curr</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">;</span>
-            <span class="p">}</span>
-            <span class="k">else</span> <span class="p">{</span>
-                <span class="k">return</span> <span class="n">curr</span><span class="o">-&gt;</span><span class="n">val</span><span class="p">;</span>
-            <span class="p">}</span>
-        <span class="p">}</span>
-        <span class="k">return</span> <span class="n">std</span><span class="o">::</span><span class="n">nullopt</span><span class="p">;</span>
-    <span class="p">}</span>
-
-    <span class="kt">void</span> <span class="nf">insert_hybrid</span><span class="p">(</span><span class="k">const</span> <span class="n">K</span> <span class="o">&amp;</span><span class="n">k</span><span class="p">,</span> <span class="k">const</span> <span class="n">V</span> <span class="o">&amp;</span><span class="n">v</span><span class="p">)</span> <span class="p">{</span>
-        <span class="n">std</span><span class="o">::</span><span class="n">unique_lock</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">shared_mutex</span><span class="o">&gt;</span> <span class="n">wl</span><span class="p">(</span><span class="n">global_rw_lock</span><span class="p">);</span>
-        <span class="c1">// ... same insertion code, but under wl.</span>
-    <span class="p">}</span>
-    <span class="c1">// Similarly for erase_hybrid.</span>
-<span class="p">};</span>
-</code></pre></div></div>
-
-<p><strong>Pros:</strong></p>
-
-<ul>
-  <li>Very simple: readers never touch per-node locks.</li>
-  <li>All readers run in parallel unless a writer holds the exclusive lock.</li>
-</ul>
-
-<p><strong>Cons:</strong></p>
-
-<ul>
-  <li>A single write blocks <em>every</em> reader. Frequent writes can cause high reader latency.</li>
-  <li>Potential <strong>writer starvation</strong>: if readers continuously arrive, a writer may wait indefinitely.</li>
-</ul>
-
-<hr />
-
-<h2 id="3-insert--delete-core-code-excerpts-with-concurrency-flowcharts">3. Insert &amp; Delete: Core Code Excerpts with Concurrency Flowcharts</h2>
-
-<p>All three strategies share the <strong>same</strong> writer logic: any insertion or deletion obtains a global writer lock (either <code class="language-plaintext highlighter-rouge">writers_mutex</code> or the exclusive <code class="language-plaintext highlighter-rouge">global_rw_lock</code>). Below are key excerpts, now augmented with “flow-charts” to illustrate the sequence of steps under concurrency.</p>
-
-<hr />
-
-<h3 id="31-insertion-insert">3.1 Insertion (<code class="language-plaintext highlighter-rouge">insert</code>)</h3>
-
-<div class="language-c++ highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="nc">K</span><span class="p">,</span> <span class="k">typename</span> <span class="nc">V</span><span class="p">,</span> <span class="k">typename</span> <span class="nc">Compare</span><span class="p">&gt;</span>
-<span class="k">class</span> <span class="nc">RBTree</span> <span class="p">{</span>
-<span class="nl">public:</span>
-    <span class="c1">// Strategy 1 &amp; 2 use this:</span>
-    <span class="k">mutable</span> <span class="n">std</span><span class="o">::</span><span class="n">mutex</span> <span class="n">writers_mutex</span><span class="p">;</span>
-
-    <span class="kt">void</span> <span class="n">insert</span><span class="p">(</span><span class="k">const</span> <span class="n">K</span> <span class="o">&amp;</span><span class="n">k</span><span class="p">,</span> <span class="k">const</span> <span class="n">V</span> <span class="o">&amp;</span><span class="n">v</span><span class="p">)</span> <span class="p">{</span>
-        <span class="c1">// 1. Serialize all writers</span>
-        <span class="n">std</span><span class="o">::</span><span class="n">unique_lock</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">mutex</span><span class="o">&gt;</span> <span class="n">guard</span><span class="p">(</span><span class="n">writers_mutex</span><span class="p">);</span>
-
-        <span class="c1">// 2. Allocate new RED node</span>
-        <span class="n">NodeT</span> <span class="o">*</span><span class="n">z</span> <span class="o">=</span> <span class="k">new</span> <span class="n">NodeT</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">Color</span><span class="o">::</span><span class="n">RED</span><span class="p">);</span>
-        <span class="n">z</span><span class="o">-&gt;</span><span class="n">left</span>  <span class="o">=</span> <span class="n">z</span><span class="o">-&gt;</span><span class="n">right</span>  <span class="o">=</span> <span class="n">z</span><span class="o">-&gt;</span><span class="n">parent</span> <span class="o">=</span> <span class="n">NIL</span><span class="p">;</span>
-
-        <span class="cm">/*───────────────────────────────────────────────────────────────────
-         * SPECIAL CASE: Empty Tree
-         *───────────────────────────────────────────────────────────────────
-         * When inserting into empty tree:
-         * 1. New node becomes root
-         * 2. Must be colored BLACK (RB property #2)
-         * 3. No rebalancing needed
-         *───────────────────────────────────────────────────────────────────*/</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">root</span> <span class="o">==</span> <span class="n">NIL</span><span class="p">)</span> <span class="p">{</span>
-            <span class="n">root</span> <span class="o">=</span> <span class="n">z</span><span class="p">;</span>
-            <span class="n">z</span><span class="o">-&gt;</span><span class="n">color</span> <span class="o">=</span> <span class="n">Color</span><span class="o">::</span><span class="n">BLACK</span><span class="p">;</span>  <span class="c1">// Root must be BLACK</span>
-            <span class="k">return</span><span class="p">;</span>
-        <span class="p">}</span>
-
-        <span class="cm">/*───────────────────────────────────────────────────────────────────
-         * SEARCH PHASE: Find Insertion Point
-         *───────────────────────────────────────────────────────────────────
-         * Standard BST search to find where new node should be inserted:
-         * - y tracks the parent of the insertion point
-         * - x traverses down the tree following BST ordering
-         * - Loop terminates when x reaches NIL (insertion point found)
-         *───────────────────────────────────────────────────────────────────*/</span>
-        <span class="n">NodeT</span> <span class="o">*</span><span class="n">y</span> <span class="o">=</span> <span class="n">NIL</span><span class="p">;</span>      <span class="c1">// Parent of insertion point</span>
-        <span class="n">NodeT</span> <span class="o">*</span><span class="n">x</span> <span class="o">=</span> <span class="n">root</span><span class="p">;</span>     <span class="c1">// Current node during traversal</span>
-
-        <span class="k">while</span> <span class="p">(</span><span class="n">x</span> <span class="o">!=</span> <span class="n">NIL</span><span class="p">)</span> <span class="p">{</span>
-            <span class="n">y</span> <span class="o">=</span> <span class="n">x</span><span class="p">;</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">comp</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">x</span><span class="o">-&gt;</span><span class="n">key</span><span class="p">))</span>       <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">;</span>
-            <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">comp</span><span class="p">(</span><span class="n">x</span><span class="o">-&gt;</span><span class="n">key</span><span class="p">,</span> <span class="n">k</span><span class="p">))</span>  <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">;</span>
-            <span class="k">else</span> <span class="p">{</span> <span class="c1">// Duplicate key</span>
-                <span class="n">x</span><span class="o">-&gt;</span><span class="n">val</span> <span class="o">=</span> <span class="n">v</span><span class="p">;</span>
-                <span class="k">delete</span> <span class="n">z</span><span class="p">;</span>
-                <span class="k">return</span><span class="p">;</span>
-            <span class="p">}</span>
-        <span class="p">}</span>
-
-        <span class="cm">/*───────────────────────────────────────────────────────────────────
-         * LINK PHASE: Insert New Node into Tree Structure
-         *───────────────────────────────────────────────────────────────────
-         * Connect new node z as child of y:
-         * - Set z's parent pointer
-         * - Set appropriate child pointer in parent y
-         * - Maintain BST ordering invariant
-         *───────────────────────────────────────────────────────────────────*/</span>
-        <span class="n">z</span><span class="o">-&gt;</span><span class="n">parent</span> <span class="o">=</span> <span class="n">y</span><span class="p">;</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">comp</span><span class="p">(</span><span class="n">z</span><span class="o">-&gt;</span><span class="n">key</span><span class="p">,</span> <span class="n">y</span><span class="o">-&gt;</span><span class="n">key</span><span class="p">))</span>  <span class="n">y</span><span class="o">-&gt;</span><span class="n">left</span>  <span class="o">=</span> <span class="n">z</span><span class="p">;</span>
-        <span class="k">else</span>                        <span class="n">y</span><span class="o">-&gt;</span><span class="n">right</span> <span class="o">=</span> <span class="n">z</span><span class="p">;</span>
-
-        <span class="cm">/*───────────────────────────────────────────────────────────────────
-         * REBALANCE PHASE: Restore Red-Black Properties
-         *───────────────────────────────────────────────────────────────────
-         * New RED node may violate RB-tree properties:
-         * - Property #4: RED node with RED parent (red-red violation)
-         * - Property #5: Potentially unbalanced black heights
-         * 
-         * insert_fixup() performs rotations and recoloring to fix violations
-         *───────────────────────────────────────────────────────────────────*/</span>
-        <span class="n">insert_fixup</span><span class="p">(</span><span class="n">z</span><span class="p">);</span>
-    <span class="p">}</span>
-
-<span class="k">private</span><span class="o">:</span>
-    <span class="kt">void</span> <span class="nf">insert_fixup</span><span class="p">(</span><span class="n">NodeT</span> <span class="o">*</span><span class="n">z</span><span class="p">)</span> <span class="p">{</span>
-        <span class="c1">// Standard CLRS cases (omitted for brevity; see above).</span>
-    <span class="p">}</span>
-    <span class="c1">// Rotations...</span>
-<span class="p">};</span>
-</code></pre></div></div>
-
-<h4 id="311-concurrency-flowchart-for-insert">3.1.1 Concurrency Flowchart for <strong>Insert</strong></h4>
-
-<p>Below is an flowchart showing the <strong>sequence of steps</strong> that happen under a concurrent workload—where multiple writers may attempt to insert or delete at once, but only one actually proceeds at a time because of <code class="language-plaintext highlighter-rouge">writers_mutex</code>.</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Insert(k, v):
-  |
-  |  [THREAD T₁] calls insert(k,v)
-  |     1. unique_lock(writers_mutex)   ←  (Blocks if another writer is in progress)
-  |     2. allocate new Node z (RED)
-  |     3. if (root == NIL):
-  |          root = z; z.color = BLACK; unlock; return
-  |     4. else: BST search (no other writer can interleave)
-  |             x = root; while (x != NIL) { ... }
-  |     5. link z as child of y
-  |     6. insert_fixup(z)—rotate &amp; recolor under same lock
-  |     7. unlock(writers_mutex)       ←  (Now next writer can proceed)
-  |
-  └──&gt; Completed insertion
-</code></pre></div></div>
-
-<p><strong>Key points under concurrency:</strong></p>
-
-<ol>
-  <li>Once <code class="language-plaintext highlighter-rouge">writers_mutex</code> is acquired, no other writer can modify the tree until the current writer releases it.</li>
-  <li>
-    <p><strong>Readers</strong> using either <code class="language-plaintext highlighter-rouge">lookup_simple</code>, <code class="language-plaintext highlighter-rouge">lookup</code>, or <code class="language-plaintext highlighter-rouge">lookup_hybrid</code> may still run concurrently, depending on the chosen strategy:</p>
-
-    <ul>
-      <li>Under <strong><code class="language-plaintext highlighter-rouge">lookup_simple</code></strong>, readers also block until the writer finishes.</li>
-      <li>Under <strong><code class="language-plaintext highlighter-rouge">lookup</code></strong>, per-node shared locks ensure readers only block if they traverse a node currently being rotated or recolored by a writer.</li>
-      <li>Under <strong><code class="language-plaintext highlighter-rouge">lookup_hybrid</code></strong>, readers block on the global <code class="language-plaintext highlighter-rouge">shared_mutex</code> if the writer holds the exclusive lock.</li>
-    </ul>
-  </li>
-</ol>
-
-<p>Below is a closer look at the “link + fixup” step inside <code class="language-plaintext highlighter-rouge">insert_fixup</code>, still holding <code class="language-plaintext highlighter-rouge">writers_mutex</code>:</p>
-
-<pre><code class="language-typograms">[Inside insert_fixup(z)]
-  ┌─────────────────────────────────────────────────────────────────┐
-  │   z is RED, parent p = z-&gt;parent, grandparent g                 │
-  │   while (p.color == RED):                                       │
-  │     if (p == g.left):                                           │
-  │       y = g.right        ← Uncle                                │
-  │       if (y.color == RED):                                      │
-  │         // Case 1: p and y are RED                              │
-  │         p.color = BLACK; y.color = BLACK; g.color = RED;        │
-  │         z = g;                                                  │
-  │       else                                                      │
-  │         if (z == p.right):                                      │
-  │           // Case 2: z is inner child                           │
-  │           z = p; left_rotate(z);                                │
-  │         // Case 3: z is outer child (after possible Case 2)     │
-  │         p.color = BLACK; g.color = RED; right_rotate(g);        │
-  │     else  // mirror when p == g.right                           │
-  │       ...                                                       │
-  │   root.color = BLACK;   ← Guarantee root is BLACK               │
-  └─────────────────────────────────────────────────────────────────┘
-</code></pre>
-
-<p>Because <code class="language-plaintext highlighter-rouge">writers_mutex</code> is held the entire time, <strong>no other writer</strong> can interleave, and <strong>no incremental per-node locking</strong> is needed here.</p>
-
-<hr />
-
-<h3 id="32-deletion-erase">3.2 Deletion (<code class="language-plaintext highlighter-rouge">erase</code>)</h3>
-
-<div class="language-c++ highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="nc">K</span><span class="p">,</span> <span class="k">typename</span> <span class="nc">V</span><span class="p">,</span> <span class="k">typename</span> <span class="nc">Compare</span><span class="p">&gt;</span>
-<span class="k">class</span> <span class="nc">RBTree</span> <span class="p">{</span>
-<span class="nl">public:</span>
-    <span class="kt">bool</span> <span class="n">erase</span><span class="p">(</span><span class="k">const</span> <span class="n">K</span> <span class="o">&amp;</span><span class="n">k</span><span class="p">)</span> <span class="p">{</span>
-        <span class="n">std</span><span class="o">::</span><span class="n">unique_lock</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">mutex</span><span class="o">&gt;</span> <span class="n">guard</span><span class="p">(</span><span class="n">writers_mutex</span><span class="p">);</span>
-
-        <span class="cm">/*───────────────────────────────────────────────────────────────────
-         * FIND PHASE: Locate Node to Delete
-         *───────────────────────────────────────────────────────────────────*/</span>
-        <span class="n">NodeT</span> <span class="o">*</span><span class="n">z</span> <span class="o">=</span> <span class="n">root</span><span class="p">;</span>
-        <span class="k">while</span> <span class="p">(</span><span class="n">z</span> <span class="o">!=</span> <span class="n">NIL</span> <span class="o">&amp;&amp;</span> <span class="n">z</span><span class="o">-&gt;</span><span class="n">key</span> <span class="o">!=</span> <span class="n">k</span><span class="p">)</span>
-            <span class="n">z</span> <span class="o">=</span> <span class="n">comp</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">z</span><span class="o">-&gt;</span><span class="n">key</span><span class="p">)</span> <span class="o">?</span> <span class="n">z</span><span class="o">-&gt;</span><span class="n">left</span> <span class="o">:</span> <span class="n">z</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">;</span>
-
-        <span class="k">if</span> <span class="p">(</span><span class="n">z</span> <span class="o">==</span> <span class="n">NIL</span><span class="p">)</span> <span class="k">return</span> <span class="nb">false</span><span class="p">;</span> <span class="c1">// Key not found</span>
-
-        <span class="cm">/*───────────────────────────────────────────────────────────────────
-         * SPLICE PHASE: Remove Node from Tree Structure
-         *───────────────────────────────────────────────────────────────────*/</span>
-        <span class="n">NodeT</span> <span class="o">*</span><span class="n">y</span> <span class="o">=</span> <span class="n">z</span><span class="p">;</span>
-        <span class="n">NodeT</span> <span class="o">*</span><span class="n">x</span> <span class="o">=</span> <span class="nb">nullptr</span><span class="p">;</span>
-        <span class="n">Color</span> <span class="n">y_original</span> <span class="o">=</span> <span class="n">y</span><span class="o">-&gt;</span><span class="n">color</span><span class="p">;</span>
-
-        <span class="k">if</span> <span class="p">(</span><span class="n">z</span><span class="o">-&gt;</span><span class="n">left</span> <span class="o">==</span> <span class="n">NIL</span><span class="p">)</span> <span class="p">{</span>
-            <span class="n">x</span> <span class="o">=</span> <span class="n">z</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">;</span>
-            <span class="n">transplant</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">z</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">);</span>
-        <span class="p">}</span>
-        <span class="k">else</span> <span class="nf">if</span> <span class="p">(</span><span class="n">z</span><span class="o">-&gt;</span><span class="n">right</span> <span class="o">==</span> <span class="n">NIL</span><span class="p">)</span> <span class="p">{</span>
-            <span class="n">x</span> <span class="o">=</span> <span class="n">z</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">;</span>
-            <span class="n">transplant</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">z</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">);</span>
-        <span class="p">}</span>
-        <span class="k">else</span> <span class="p">{</span>
-            <span class="c1">// Two children → find successor y</span>
-            <span class="n">y</span> <span class="o">=</span> <span class="n">minimum</span><span class="p">(</span><span class="n">z</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">);</span>
-            <span class="n">y_original</span> <span class="o">=</span> <span class="n">y</span><span class="o">-&gt;</span><span class="n">color</span><span class="p">;</span>
-            <span class="n">x</span> <span class="o">=</span> <span class="n">y</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">;</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">y</span><span class="o">-&gt;</span><span class="n">parent</span> <span class="o">==</span> <span class="n">z</span><span class="p">)</span> <span class="p">{</span>
-                <span class="n">x</span><span class="o">-&gt;</span><span class="n">parent</span> <span class="o">=</span> <span class="n">y</span><span class="p">;</span>
-            <span class="p">}</span>
-            <span class="k">else</span> <span class="p">{</span>
-                <span class="n">transplant</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">y</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">);</span>
-                <span class="n">y</span><span class="o">-&gt;</span><span class="n">right</span> <span class="o">=</span> <span class="n">z</span><span class="o">-&gt;</span><span class="n">right</span><span class="p">;</span>
-                <span class="n">y</span><span class="o">-&gt;</span><span class="n">right</span><span class="o">-&gt;</span><span class="n">parent</span> <span class="o">=</span> <span class="n">y</span><span class="p">;</span>
-            <span class="p">}</span>
-            <span class="n">transplant</span><span class="p">(</span><span class="n">z</span><span class="p">,</span> <span class="n">y</span><span class="p">);</span>
-            <span class="n">y</span><span class="o">-&gt;</span><span class="n">left</span> <span class="o">=</span> <span class="n">z</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">;</span>
-            <span class="n">y</span><span class="o">-&gt;</span><span class="n">left</span><span class="o">-&gt;</span><span class="n">parent</span> <span class="o">=</span> <span class="n">y</span><span class="p">;</span>
-            <span class="n">y</span><span class="o">-&gt;</span><span class="n">color</span> <span class="o">=</span> <span class="n">z</span><span class="o">-&gt;</span><span class="n">color</span><span class="p">;</span>
-        <span class="p">}</span>
-        <span class="k">delete</span> <span class="n">z</span><span class="p">;</span> <span class="c1">// Remove actual node</span>
-
-        <span class="cm">/*───────────────────────────────────────────────────────────────────
-         * FIXUP PHASE: Restore Red-Black Properties if needed
-         *───────────────────────────────────────────────────────────────────*/</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">y_original</span> <span class="o">==</span> <span class="n">Color</span><span class="o">::</span><span class="n">BLACK</span><span class="p">)</span> <span class="p">{</span>
-            <span class="n">delete_fixup</span><span class="p">(</span><span class="n">x</span><span class="p">);</span>
-        <span class="p">}</span>
-        <span class="k">return</span> <span class="nb">true</span><span class="p">;</span>
-    <span class="p">}</span>
-
-<span class="k">private</span><span class="o">:</span>
-    <span class="kt">void</span> <span class="nf">delete_fixup</span><span class="p">(</span><span class="n">NodeT</span> <span class="o">*</span><span class="n">x</span><span class="p">)</span> <span class="p">{</span>
-        <span class="c1">// Standard CLRS delete_fixup (omitted for brevity; see above).</span>
-    <span class="p">}</span>
-
-    <span class="kt">void</span> <span class="nf">transplant</span><span class="p">(</span><span class="n">NodeT</span> <span class="o">*</span><span class="n">u</span><span class="p">,</span> <span class="n">NodeT</span> <span class="o">*</span><span class="n">v</span><span class="p">)</span> <span class="p">{</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">u</span><span class="o">-&gt;</span><span class="n">parent</span> <span class="o">==</span> <span class="n">NIL</span><span class="p">)</span>          <span class="n">root</span> <span class="o">=</span> <span class="n">v</span><span class="p">;</span>
-        <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">u</span> <span class="o">==</span> <span class="n">u</span><span class="o">-&gt;</span><span class="n">parent</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">)</span> <span class="n">u</span><span class="o">-&gt;</span><span class="n">parent</span><span class="o">-&gt;</span><span class="n">left</span>  <span class="o">=</span> <span class="n">v</span><span class="p">;</span>
-        <span class="k">else</span>                           <span class="n">u</span><span class="o">-&gt;</span><span class="n">parent</span><span class="o">-&gt;</span><span class="n">right</span> <span class="o">=</span> <span class="n">v</span><span class="p">;</span>
-        <span class="n">v</span><span class="o">-&gt;</span><span class="n">parent</span> <span class="o">=</span> <span class="n">u</span><span class="o">-&gt;</span><span class="n">parent</span><span class="p">;</span>
-    <span class="p">}</span>
-
-    <span class="n">NodeT</span> <span class="o">*</span><span class="n">minimum</span><span class="p">(</span><span class="n">NodeT</span> <span class="o">*</span><span class="n">x</span><span class="p">)</span> <span class="k">const</span> <span class="p">{</span>
-        <span class="k">while</span> <span class="p">(</span><span class="n">x</span><span class="o">-&gt;</span><span class="n">left</span> <span class="o">!=</span> <span class="n">NIL</span><span class="p">)</span> <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">-&gt;</span><span class="n">left</span><span class="p">;</span>
-        <span class="k">return</span> <span class="n">x</span><span class="p">;</span>
-    <span class="p">}</span>
-    <span class="c1">// Rotations and delete_fixup code...</span>
-<span class="p">};</span>
-</code></pre></div></div>
-
-<h4 id="321-concurrency-flowchart-for-delete">3.2.1 Concurrency Flowchart for <strong>Delete</strong></h4>
-
-<p>Below is an flowchart illustrating how deletion proceeds under concurrent workloads. Again, the <strong>writer</strong> holds the single <code class="language-plaintext highlighter-rouge">writers_mutex</code> from start to finish, ensuring no other writer can modify the tree simultaneously:</p>
-
-<pre><code class="language-typograms">Erase(k):
-  |
-  |  [THREAD T₁] calls erase(k)
-  |     1. unique_lock(writers_mutex)   ←  (Blocks if another writer is in progress)
-  |     2. Find phase:
-  |          z = root
-  |          while (z != NIL &amp;&amp; z-&gt;key != k) {
-  |            if (k &lt; z-&gt;key) z = z-&gt;left; else z = z-&gt;right;
-  |          }
-  |          if (z == NIL): unlock; return false
-  |     3. Splice phase:
-  |          if (z has ≤1 child):
-  |            x = (child or NIL)
-  |            transplant(z, x)
-  |          else: // two children
-  |            y = minimum(z-&gt;right)   // in-order successor
-  |            y_original = y-&gt;color
-  |            x = y-&gt;right
-  |            if (y.parent == z) x.parent = y
-  |            else {
-  |              transplant(y, y-&gt;right)
-  |              y.right = z-&gt;right
-  |              y.right-&gt;parent = y
-  |            }
-  |            transplant(z, y)
-  |            y.left = z-&gt;left
-  |            y.left-&gt;parent = y
-  |            y.color = z-&gt;color
-  |          delete z
-  |     4. If (y_original == BLACK) delete_fixup(x)
-  |          // delete_fixup does rotations &amp; recolors under writers_mutex
-  |     5. unlock(writers_mutex)
-  |
-  └──&gt; Completed deletion
-</code></pre>
-
-<p><strong>Key points under concurrency:</strong></p>
-
-<ol>
-  <li>Once <code class="language-plaintext highlighter-rouge">writers_mutex</code> is acquired, no other writer can modify the tree until the current writer releases it.</li>
-  <li>
-    <p><strong>Readers</strong>:</p>
-
-    <ul>
-      <li>Under <strong><code class="language-plaintext highlighter-rouge">lookup_simple</code></strong>, readers block until the writer finishes.</li>
-      <li>Under <strong><code class="language-plaintext highlighter-rouge">lookup</code></strong>, readers hold per-node shared locks—if a delete’s rotation touches a node a reader currently holds a shared lock on, the delete will block until that shared lock is released.</li>
-      <li>Under <strong><code class="language-plaintext highlighter-rouge">lookup_hybrid</code></strong>, readers block on <code class="language-plaintext highlighter-rouge">global_rw_lock</code> if the writer holds the exclusive lock.</li>
-    </ul>
-  </li>
-</ol>
-
-<p>Below are two delete_fixup cases (Case 2 and Case 4) illustrated with diagrams:</p>
-
-<pre><code class="language-typograms">/*───────────────────────────────────────────────────────────────────────
- * CASE 2: Sibling BLACK, both nephews BLACK
- *───────────────────────────────────────────────────────────────────────
- * No BLACK nodes to "borrow" from sibling subtree.
- * Push extra black up to parent:
- * 
- * Before:               After:
- *      p(?)              p(+1 black)
- *     /    \             /        \
- *  x(DB)  w(B)   →    x(B)     w(R)
- *         /  \                  /   \
- *       a(B) b(B)            a(B)  b(B)
- *───────────────────────────────────────────────────────────────────────*/
-</code></pre>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/*───────────────────────────────────────────────────────────────────────
- * CASE 4: Sibling BLACK, far nephew RED
- *───────────────────────────────────────────────────────────────────────
- * Final rotation to absorb extra black:
- * 
- * Before:                After:
- *      p(?)               w(?)
- *     /    \            /     \
- *  x(DB)  w(B)   →   p(B)    c(B)
- *         /  \       /   \
- *       a(?) c(R)  x(B) a(?)
- * 
- * Extra black absorbed, algorithm terminates
- *───────────────────────────────────────────────────────────────────────*/
-</code></pre></div></div>
-
-<p>Although those two cases are <strong>inside</strong> <code class="language-plaintext highlighter-rouge">delete_fixup</code>, they do not illustrate concurrency per se, they illustrate local color/rotation adjustments. Concurrency comes into play if a reader holds a shared lock on any of these nodes; the writer will wait for the reader to release that lock.</p>
-
-<hr />
-
-<h2 id="4-summary--next-steps">4. Summary &amp; Next Steps</h2>
-
-<p>In this post, we have sketched a <strong>straightforward</strong> approach to make a Red-Black Tree thread-safe in C++:</p>
-
-<ol>
-  <li>
-    <p><strong>Node Layout &amp; Sentinel</strong></p>
-
-    <ul>
-      <li>Each node carries a <code class="language-plaintext highlighter-rouge">std::shared_mutex rw</code> and a <code class="language-plaintext highlighter-rouge">lock_id</code>.</li>
-      <li>A single <code class="language-plaintext highlighter-rouge">NIL</code> sentinel replaces <code class="language-plaintext highlighter-rouge">nullptr</code> children, always colored BLACK.</li>
-    </ul>
-  </li>
-  <li>
-    <p><strong>Three Reader Strategies</strong></p>
-
-    <ul>
-      <li><strong>Simple Serialization:</strong> All readers/writers share one mutex—easy, but no parallel reads.</li>
-      <li><strong>Lock Coupling:</strong> Per-node shared locks and an ordered guard to prevent deadlocks. Readers in disjoint subtrees can proceed concurrently.</li>
-      <li><strong>Global RW Lock:</strong> One <code class="language-plaintext highlighter-rouge">std::shared_mutex</code> for the entire tree. Readers run in parallel, but writers block everyone.</li>
-    </ul>
-  </li>
-  <li>
-    <p><strong>Writer Serialization for Insert &amp; Delete</strong></p>
-
-    <ul>
-      <li>All modifications (<code class="language-plaintext highlighter-rouge">insert</code>, <code class="language-plaintext highlighter-rouge">erase</code>) acquire a global mutex (or exclusive lock) to maintain the RB invariants.</li>
-      <li>Standard CLRS-style rotations and fixups restore color and black-height properties.</li>
-    </ul>
-  </li>
-  <li>
-    <p><strong>Concurrency Flowcharts for Insert &amp; Delete</strong></p>
-
-    <ul>
-      <li><strong>Insert:</strong> acquire <code class="language-plaintext highlighter-rouge">writers_mutex</code> → link new node → <code class="language-plaintext highlighter-rouge">insert_fixup</code> → release.</li>
-      <li><strong>Delete:</strong> acquire <code class="language-plaintext highlighter-rouge">writers_mutex</code> → splice out node → <code class="language-plaintext highlighter-rouge">delete_fixup</code> → release.</li>
-      <li>Readers may block or progress concurrently depending on chosen lookup strategy.</li>
-    </ul>
-  </li>
-  <li>
-    <p><strong>Delete Fixup Cases</strong> (Case 2 and Case 4 shown with diagrams)</p>
-  </li>
-</ol>
-
-<p>Although a specialized lock-free or latch-coupled B-Tree may offer better raw performance on large, highly contested workloads, this approach is easy to understand and maintain if you already know single-threaded Red-Black Trees. It preserves $O(\log n)$ complexity in the absence of contention, and it offers three clear points of trade-off between simplicity and reader parallelism.</p>
-
-<p>You can find the full example code (including a simple demo <code class="language-plaintext highlighter-rouge">main()</code> with TSAN/ASAN tests) on GitHub:</p>
-
-<blockquote>
-  <p><strong>GitHub Repository:</strong> <a href="https://github.com/EthanCornell/RedLockTree/blob/main/lock_based_rb_tree.cpp">https://github.com/EthanCornell/RedLockTree/blob/main/lock_based_rb_tree.cpp</a></p>
-</blockquote>
-
-<p>In the next article, <strong>“Verification: Ensuring Correctness with Sanitizers and Self-Checks,”</strong> we will demonstrate how to:</p>
-
-<ul>
-  <li>Integrate <strong>ThreadSanitizer (TSAN)</strong> to detect data races.</li>
-  <li>Use <strong>AddressSanitizer (ASAN)</strong> to catch memory errors.</li>
-  <li>Write a <code class="language-plaintext highlighter-rouge">validate()</code> routine that continuously checks RB-Tree invariants during concurrent operations.</li>
-</ul>
-
-<p>Stay tuned for more on making sure your concurrent data structures remain correct under stress!</p>]]></content><author><name></name></author><category term="computer-sciences" /><category term="concurrent" /><category term="ds-and-algorithms" /><summary type="html"><![CDATA[Sharing ideas on making a Red-Black Tree thread-safe using C++ shared_mutex and multiple reader strategies, plus visual flowcharts for insert/delete under concurrency]]></summary></entry></feed>
+
+
+
+    
+  
+
+  
+  
+</div>
+
+      
+    </div>
+
+    <!-- Footer -->
+    
+
+
+  <footer class="fixed-bottom" role="contentinfo">
+    <div class="container mt-0">
+      
+  © Copyright 2025
+  Ethan
+  
+  Huang. Powered by <a href="https://jekyllrb.com/" target="_blank" rel="external nofollow noopener">Jekyll</a> with <a href="https://github.com/EthanCornell" rel="external nofollow noopener" target="_blank">Ethan</a> theme. Hosted by <a href="https://pages.github.com/" target="_blank" rel="external nofollow noopener">GitHub Pages</a>. Photos from <a href="https://unsplash.com" target="_blank" rel="external nofollow noopener">Unsplash</a>.
+
+  
+  
+
+    </div>
+  </footer>
+
+
+
+    <!-- JavaScripts -->
+    <!-- jQuery -->
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
+<!-- Bootsrap & MDB scripts -->
+<script src="/assets/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mdbootstrap@4.20.0/js/mdb.min.js" integrity="sha256-NdbiivsvWt7VYCt6hYNT3h/th9vSTL4EDWeGs5SN3DA=" crossorigin="anonymous"></script>
+
+
+  <!-- Masonry & imagesLoaded -->
+  <script defer src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha256-Nn1q/fx0H7SNLZMQ5Hw5JLaTRZp0yILA/FRexe19VdI=" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/imagesloaded@5.0.0/imagesloaded.pkgd.min.js" integrity="sha256-htrLFfZJ6v5udOG+3kNLINIKh2gvoKqwEhHYfTTMICc=" crossorigin="anonymous"></script>
+  <script defer src="/assets/js/masonry.js?c999e8c5281874b7534e3352f835d4c3" type="text/javascript"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <!-- Medium Zoom JS -->
+  <script defer src="https://cdn.jsdelivr.net/npm/medium-zoom@1.1.0/dist/medium-zoom.min.js" integrity="sha256-ZgMyDAIYDYGxbcpJcfUnYwNevG/xi9OHKaR/8GK+jWc=" crossorigin="anonymous"></script>
+  <script defer src="/assets/js/zoom.js?b977fe0c21b2118ed853308b1b923969"></script>
+
+
+
+
+
+
+<!-- Load Common JS -->
+<script src="/assets/js/no_defer.js?699fa7cbe3b29f831db7d5250ba3203a"></script>
+<script defer src="/assets/js/common.js?d3a25b46bbd2e0a751a27b173abc6e5f"></script>
+<script defer src="/assets/js/copy_code.js?fff63901a03063094790ffbfd4bc0cb4" type="text/javascript"></script>
+
+<!-- Jupyter Open External Links New Tab -->
+<script defer src="/assets/js/jupyter_new_tab.js?25eff8ff4144a010e4ad7b31403102cf"></script>
+
+<!-- Badges -->
+
+  <script async src="https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js"></script>
+
+
+  <script async src="https://badge.dimensions.ai/badge.js"></script>
+
+
+
+  <!-- MathJax -->
+  <script defer type="text/javascript" id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js" integrity="sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI=" crossorigin="anonymous"></script>
+  
+    <script src="/assets/js/mathjax-setup.js?04761245f225e3ad9e5e3f875d4e1074"></script>
+    <script defer src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6" crossorigin="anonymous"></script>
+  
+
+
+
+
+
+
+
+
+
+  <!-- Scrolling Progress Bar -->
+  <script defer src="/assets/js/progress-bar.js?b78cb42895d74e4fd6de6f633edcf181" type="text/javascript"></script>
+
+
+
+
+
+
+
+  <!-- Back to Top -->
+  <script src="/assets/js/vanilla-back-to-top.min.js?f40d453793ff4f64e238e420181a1d17"></script>
+  <script>
+    addBackToTop();
+  </script>
+
+
+
+  <!-- Search -->
+  <script type="module" src="/assets/js/search/ninja-keys.min.js?a3446f084dcaecc5f75aa1757d087dcf"></script>
+  <ninja-keys hidebreadcrumbs noautoloadmdicons placeholder="Type to start searching"></ninja-keys>
+  <script src="/assets/js/search-setup.js?ade73d6d60912d119f9c9347bc176630"></script>
+  <script src="/assets/js/search-data.js"></script>
+  <script src="/assets/js/shortcut-key.js?f74bfa9a88ab862fb9df1c46146b7b7d"></script>
+
+
+
+
+  </body>
+</html>

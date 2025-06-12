@@ -30,7 +30,18 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/cv/";
           },
-        },{id: "post-modern-concurrent-red-black-tree-design-in-c-a-practical-guide-part-1",
+        },{id: "post-mini-malloc-from-scratch-to-safe-building-a-thread-safe-memory-allocator-in-c",
+        
+          title: "mini_malloc: From Scratch to Safe: Building a Thread-Safe Memory Allocator in C",
+        
+        description: "This document provides an in-depth look at the design and implementation of **mini_malloc**, a small, first-fit, thread-safe memory allocator in C. It covers the allocator’s architecture, data structures, algorithms, debugging facilities, and testing strategy.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/memory/";
+          
+        },
+      },{id: "post-modern-concurrent-red-black-tree-design-in-c-a-practical-guide-part-1",
         
           title: "Modern Concurrent Red-Black Tree Design in C++: A Practical Guide - Part 1...",
         
