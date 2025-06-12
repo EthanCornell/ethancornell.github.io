@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" hreflang="en" /><updated>2025-06-12T00:19:09-04:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">blank</title><subtitle>A simple, whitespace theme for academics. Based on [*folio](https://github.com/bogoli/-folio) design.
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" hreflang="en" /><updated>2025-06-12T02:03:17-04:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">blank</title><subtitle>A simple, whitespace theme for academics. Based on [*folio](https://github.com/bogoli/-folio) design.
 </subtitle><entry><title type="html">mini_malloc: From Scratch to Safe: Building a Thread-Safe Memory Allocator in C</title><link href="http://localhost:4000/blog/2025/memory/" rel="alternate" type="text/html" title="mini_malloc: From Scratch to Safe: Building a Thread-Safe Memory Allocator in C" /><published>2025-06-10T16:23:00-04:00</published><updated>2025-06-10T16:23:00-04:00</updated><id>http://localhost:4000/blog/2025/memory</id><content type="html" xml:base="http://localhost:4000/blog/2025/memory/"><![CDATA[<p>This technical note provides a comprehensive analysis of <strong>mini_malloc</strong>, a custom memory allocator implementation that demonstrates key concepts in systems programming. The allocator features:</p>
 
 <ul>
@@ -16,29 +16,31 @@
 <h2 id="table-of-contents">Table of Contents</h2>
 
 <ol>
-  <li><a href="#introduction--motivation">Introduction &amp; Motivation</a></li>
-  <li><a href="#requirements-analysis">Requirements Analysis</a></li>
-  <li><a href="#architectural-overview">Architectural Overview</a></li>
-  <li><a href="#core-data-structures">Core Data Structures</a></li>
-  <li><a href="#memory-management-strategies">Memory Management Strategies</a></li>
-  <li><a href="#implementation-deep-dive">Implementation Deep Dive</a>
+  <li><a href="#1-introduction--motivation">Introduction &amp; Motivation</a></li>
+  <li><a href="#2-requirements-analysis">Requirements Analysis</a></li>
+  <li><a href="#3-architectural-overview">Architectural Overview</a></li>
+  <li><a href="#4-core-data-structures">Core Data Structures</a></li>
+  <li><a href="#5-memory-management-strategies">Memory Management Strategies</a></li>
+  <li><a href="#6-implementation-deep-dive">Implementation Deep Dive</a>
     <ul>
-      <li>6.1 <a href="#block-metadata-design">Block Metadata Design</a></li>
-      <li>6.2 <a href="#arena-based-concurrency">Arena-Based Concurrency</a></li>
-      <li>6.3 <a href="#allocation-algorithm">Allocation Algorithm</a></li>
-      <li>6.4 <a href="#deallocation--coalescing">Deallocation &amp; Coalescing</a></li>
-      <li>6.5 <a href="#large-block-handling">Large Block Handling</a></li>
-      <li>6.6 <a href="#memory-alignment">Memory Alignment</a></li>
+      <li>6.1 <a href="#61-block-metadata-design">Block Metadata Design</a></li>
+      <li>6.2 <a href="#62-arena-based-concurrency">Arena-Based Concurrency</a></li>
+      <li>6.3 <a href="#63-allocation-algorithm">Allocation Algorithm</a></li>
+      <li>6.4 <a href="#64-deallocation--coalescing">Deallocation &amp; Coalescing</a></li>
+      <li>6.5 <a href="#65-large-block-handling">Large Block Handling</a></li>
+      <li>6.6 <a href="#65-large-block-handling">Memory Alignment</a></li>
     </ul>
   </li>
-  <li><a href="#thread-safety-analysis">Thread Safety Analysis</a></li>
-  <li><a href="#performance-characteristics">Performance Characteristics</a></li>
-  <li><a href="#testing--validation">Testing &amp; Validation</a></li>
-  <li><a href="#real-world-considerations">Real-World Considerations</a></li>
-  <li><a href="#comparison-with-production-allocators">Comparison with Production Allocators</a></li>
-  <li><a href="#future-enhancements">Future Enhancements</a></li>
-  <li><a href="#lessons-learned">Lessons Learned</a></li>
-  <li><a href="#conclusion">Conclusion</a></li>
+  <li><a href="#7-thread-safety-analysis">Thread Safety Analysis</a></li>
+  <li><a href="#8-performance-characteristics">Performance Characteristics</a></li>
+  <li><a href="#9-testing--validation">Testing &amp; Validation</a></li>
+  <li><a href="#10-real-world-considerations">Real-World Considerations</a></li>
+  <li><a href="#11-comparison-with-production-allocators">Comparison with Production Allocators</a></li>
+  <li><a href="#12-future-enhancements">Future Enhancements</a></li>
+  <li><a href="#13-lessons-learned">Lessons Learned</a></li>
+  <li><a href="#14-path-to-production-whats-missing-and-why">Path to Production: What’s Missing and Why</a></li>
+  <li><a href="#15-conclusion">Conclusion</a></li>
+  <li><a href="#appendix-a-comprehensive-test-suite">Appendix A: Comprehensive Test Suite</a></li>
 </ol>
 
 <hr />
@@ -1231,7 +1233,7 @@ Memory layout:  [block_meta][....user data....][block_meta][....user data....]
 
 <h2 id="appendix-a-comprehensive-test-suite">Appendix A: Comprehensive Test Suite</h2>
 
-<p>Below is the full source of our <code class="language-plaintext highlighter-rouge">test_mini_malloc.c</code> harness, which exercises every layer of functionality, from basic correctness through stress and white-box introspection.</p>
+<p>Below you’ll find the complete source for <code class="language-plaintext highlighter-rouge">mini_malloc.h</code>, <code class="language-plaintext highlighter-rouge">mini_malloc.c</code>, and the <code class="language-plaintext highlighter-rouge">test_mini_malloc.c</code> harness, covering every aspect of functionality—from basic correctness checks to stress testing and white-box introspection.</p>
 
 <div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/*
  * mini_malloc.h - Header file for mini_malloc memory allocator
