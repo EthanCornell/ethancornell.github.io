@@ -319,6 +319,9 @@
 </ul>
 
 <p>The implementation balances simplicity (under 800 lines) with real-world functionality, making it suitable for educational purposes, embedded systems, and as a foundation for more sophisticated allocators.</p>
+<blockquote>
+  <p>🧠 <strong>Live Demo</strong>: Explore the allocator internals with the <a href="https://mini-malloc.onrender.com/" rel="external nofollow noopener" target="_blank">mini-malloc visual simulator</a></p>
+</blockquote>
 
 <hr>
 
@@ -589,6 +592,88 @@ Memory layout:  [block_meta][....user data....][block_meta][....user data....]
                      └── metadata (hidden)          └── next block
 </code></pre></div></div>
 
+<h3 id="block-metadata-1">Block Metadata</h3>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">typedef</span> <span class="k">struct</span> <span class="n">block_meta</span> <span class="p">{</span>
+    <span class="kt">size_t</span> <span class="n">size</span><span class="p">;</span>               <span class="c1">// Payload size in bytes</span>
+    <span class="k">struct</span> <span class="n">block_meta</span> <span class="o">*</span><span class="n">next</span><span class="p">;</span>   <span class="c1">// Next block in arena list</span>
+    <span class="k">struct</span> <span class="n">block_meta</span> <span class="o">*</span><span class="n">prev</span><span class="p">;</span>   <span class="c1">// Previous block in arena list</span>
+    <span class="kt">uint8_t</span> <span class="n">free</span><span class="p">;</span>              <span class="c1">// 1 = free, 0 = in-use</span>
+    <span class="kt">uint8_t</span> <span class="n">use_mmap</span><span class="p">;</span>          <span class="c1">// 1 = allocated via mmap</span>
+    <span class="kt">uint8_t</span> <span class="n">arena_idx</span><span class="p">;</span>         <span class="c1">// Owning arena index</span>
+<span class="p">}</span> <span class="n">block_meta_t</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p><strong>Design Rationale:</strong></p>
+<ul>
+  <li>
+<strong>Doubly-linked list</strong>: Enables O(1) removal during coalescing</li>
+  <li>
+<strong>Explicit free flag</strong>: Simplifies corruption detection</li>
+  <li>
+<strong>Arena index</strong>: Allows block to find its owning arena</li>
+  <li>
+<strong>mmap flag</strong>: Different deallocation path for large blocks</li>
+</ul>
+
+<h4 id="memory-layout-visualization">Memory Layout Visualization</h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Memory Layout of a Block:
+┌─────────────────────┬──────────────────────────────────┐
+│    Block Metadata   │         User Payload             │
+│     (block_meta)    │        (size bytes)              │
+└─────────────────────┴──────────────────────────────────┘
+^                     ^
+│                     │
+block_meta *b         void *ptr (returned to user)
+</code></pre></div></div>
+
+<h3 id="arena-structure-1">Arena Structure</h3>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">typedef</span> <span class="k">struct</span> <span class="n">arena</span> <span class="p">{</span>
+    <span class="n">pthread_mutex_t</span> <span class="n">lock</span><span class="p">;</span>      <span class="c1">// Per-arena lock</span>
+    <span class="n">block_meta</span> <span class="o">*</span><span class="n">base</span><span class="p">;</span>          <span class="c1">// Head of block list</span>
+<span class="p">}</span> <span class="n">arena_t</span><span class="p">;</span>
+
+<span class="k">static</span> <span class="n">arena_t</span> <span class="n">arenas</span><span class="p">[</span><span class="n">NUM_ARENAS</span><span class="p">];</span>
+</code></pre></div></div>
+
+<h4 id="arena-system-visualization">Arena System Visualization</h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Thread Distribution Across Arenas:
+Thread ID % NUM_ARENAS (8) = Arena Index
+
+Thread 12345 → Arena 1    Thread 12346 → Arena 2    Thread 12347 → Arena 3
+     │                          │                          │
+     ▼                          ▼                          ▼
+┌─────────────┐            ┌─────────────┐            ┌─────────────┐
+│   Arena 0   │            │   Arena 1   │            │   Arena 2   │
+│ mutex_lock  │            │ mutex_lock  │            │ mutex_lock  │
+│    base ────┼──┐         │    base ────┼──┐         │    base ────┼──┐
+└─────────────┘  │         └─────────────┘  │         └─────────────┘  │
+                 │                          │                          │
+                 ▼                          ▼                          ▼
+            Block List                 Block List                 Block List
+</code></pre></div></div>
+
+<h4 id="doubly-linked-list-structure-in-arena">Doubly-Linked List Structure in Arena</h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Arena Block List (Doubly-Linked):
+arena-&gt;base
+    │
+    ▼
+┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
+│   Block 1   │◄──►│   Block 2   │◄──►│   Block 3   │◄──►│   Block 4   │
+│ size: 64    │    │ size: 128   │    │ size: 32    │    │ size: 256   │
+│ free: 0     │    │ free: 1     │    │ free: 0     │    │ free: 1     │
+│ prev: NULL  │    │ prev: ───   │    │ prev: ───   │    │ prev: ───   │
+│ next: ───   │    │ next: ───   │    │ next: ───   │    │ next: NULL  │
+└─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘
+      │                  │                  │                  │
+      ▼                  ▼                  ▼                  ▼
+   [IN USE]           [FREE]            [IN USE]           [FREE]
+</code></pre></div></div>
+
 <hr>
 
 <h2 id="5-memory-management-strategies">5. Memory Management Strategies</h2>
@@ -765,6 +850,56 @@ Memory layout:  [block_meta][....user data....][block_meta][....user data....]
 
 <p>The function also tracks the last block examined, which proves crucial when we need to extend the heap. If no suitable block exists, we know exactly where to link new memory.</p>
 
+<h4 id="first-fit-search-visualization">First-Fit Search Visualization</h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>malloc(100) - Searching for first fit:
+
+┌─────────────┐    ┌─────────────┐        ┌─────────────┐    ┌─────────────┐
+│   Block 1   │    │   Block 2   │        │   Block 3   │    │   Block 4   │
+│ size: 64    │    │ size: 128   │ ←──    │ size: 32    │    │ size: 256   │
+│ free: 0     │    │ free: 1     │ FOUND! │ free: 0     │    │ free: 1     │
+└─────────────┘    └─────────────┘        └─────────────┘    └─────────────┘
+     SKIP           SIZE &gt;= 100                SKIP              SKIP
+   (in use)         FIRST FIT!               (in use)         (would fit too)
+</code></pre></div></div>
+
+<p>Our implementation uses a first-fit algorithm, which sounds exactly like what it does: we traverse the free list and take the first block that’s large enough to satisfy the request.</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">static</span> <span class="n">block_meta</span> <span class="o">*</span><span class="nf">find_free_block</span><span class="p">(</span><span class="n">block_meta</span> <span class="o">**</span><span class="n">last</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">size</span><span class="p">,</span> <span class="n">arena_t</span> <span class="o">*</span><span class="n">a</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">block_meta</span> <span class="o">*</span><span class="n">current</span> <span class="o">=</span> <span class="n">a</span><span class="o">-&gt;</span><span class="n">base</span><span class="p">;</span>
+    <span class="o">*</span><span class="n">last</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+    
+    <span class="k">while</span> <span class="p">(</span><span class="n">current</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">current</span><span class="o">-&gt;</span><span class="n">free</span> <span class="o">&amp;&amp;</span> <span class="n">current</span><span class="o">-&gt;</span><span class="n">size</span> <span class="o">&gt;=</span> <span class="n">size</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="n">current</span><span class="p">;</span>  <span class="c1">// First fit</span>
+        <span class="p">}</span>
+        <span class="o">*</span><span class="n">last</span> <span class="o">=</span> <span class="n">current</span><span class="p">;</span>
+        <span class="n">current</span> <span class="o">=</span> <span class="n">current</span><span class="o">-&gt;</span><span class="n">next</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h4 id="block-splitting-visualization">Block Splitting Visualization</h4>
+
+<p>When we find a free block larger than needed, we face a choice: waste the extra space or split the block. mini_malloc always attempts to split, but with an important caveat:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Before Split:
+┌─────────────┐
+│   Block 2   │
+│ size: 128   │
+│ free: 1     │
+└─────────────┘
+
+After Split (malloc requested 100 bytes):
+┌─────────────┐    ┌─────────────┐
+│   Block 2   │    │   New Block │
+│ size: 100   │    │ size: 12    │  (128 - 100 - META_SIZE)
+│ free: 0     │    │ free: 1     │
+└─────────────┘    └─────────────┘
+   ALLOCATED         REMAINDER
+</code></pre></div></div>
+
 <h4 id="block-splitting">Block Splitting</h4>
 
 <p>When we find a free block larger than needed, we face a choice: waste the extra space or split the block. mini_malloc always attempts to split, but with an important caveat:</p>
@@ -835,6 +970,28 @@ Memory layout:  [block_meta][....user data....][block_meta][....user data....]
 
 <p>This design decision exemplifies a common trade-off in systems programming: we spend extra memory (8 bytes per block for the prev pointer) to gain algorithmic efficiency. For an allocator that might manage thousands of blocks, the difference between O(1) and O(n) operations can be substantial.</p>
 
+<h4 id="coalescing-visualization">Coalescing Visualization</h4>
+
+<p>When a block is freed, we check both its neighbors. If either is also free, we merge them into a single larger block. This process happens recursively—if we merge with the previous block, that combined block might now be adjacent to another free block.</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Before Free:
+┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
+│   Block 1   │    │   Block 2   │    │   Block 3   │    │   Block 4   │
+│ size: 64    │    │ size: 128   │    │ size: 32    │    │ size: 256   │
+│ free: 0     │    │ free: 1     │    │ free: 0     │    │ free: 1     │
+└─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘
+
+free(Block 1) called:
+
+After Free and Coalescing:
+┌─────────────────────────────────┐    ┌─────────────┐    ┌─────────────┐
+│         Coalesced Block         │    │   Block 3   │    │   Block 4   │
+│ size: 64 + 16 + 128 = 208       │    │ size: 32    │    │ size: 256   │
+│ free: 1                         │    │ free: 0     │    │ free: 1     │
+└─────────────────────────────────┘    └─────────────┘    └─────────────┘
+  (Block 1 + META + Block 2)              (unchanged)        (unchanged)
+</code></pre></div></div>
+
 <h3 id="65-large-block-handling">6.5 Large Block Handling</h3>
 
 <h4 id="mmap-allocation">mmap Allocation</h4>
@@ -864,6 +1021,24 @@ Memory layout:  [block_meta][....user data....][block_meta][....user data....]
     
     <span class="k">return</span> <span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="p">)(</span><span class="n">b</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
 <span class="p">}</span>
+</code></pre></div></div>
+
+<h4 id="large-allocation-mmap-visualization">Large Allocation (mmap) Visualization</h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Size &gt;= MMAP_THRESHOLD (64KB):
+
+Regular Arena Blocks (sbrk):                Large Allocation (mmap):
+┌─────────────┐                           ┌──────────────────────────┐
+│   Arena 0   │                           │     Separate Memory      │
+│ Block List  │                           │        Region            │
+└─────────────┘                           │                          │
+                                          │  ┌─────────────────────┐ │
+Global mmap tracking list:                │  │    Large Block      │ │
+mmap_blocks_head ──────────────────────────► │  size: 65536        │ │
+                                          │  │  use_mmap: 1        │ │
+                                          │  │  arena_idx: 0       │ │
+                                          │  └─────────────────────┘ │
+                                          └──────────────────────────┘
 </code></pre></div></div>
 
 <h3 id="66-memory-alignment">6.6 Memory Alignment</h3>
@@ -956,6 +1131,120 @@ Memory layout:  [block_meta][....user data....][block_meta][....user data....]
 <p>Despite these costs, the arena design performs remarkably well. Testing shows near-linear scaling up to the number of arenas, with graceful degradation beyond that point. This represents a massive improvement over global locking, which would show no scaling at all.</p>
 
 <p>The key insight is that perfect thread safety doesn’t require perfect parallelism. By accepting some contention in exchange for simplicity and correctness, mini_malloc achieves practical multithreaded performance suitable for many applications.</p>
+
+<h3 id="thread-safety-with-arenas">Thread Safety with Arenas</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Multi-threaded Access:
+
+Thread 1                    Thread 2                    Thread 3
+(arena 1)                   (arena 2)                   (arena 1)
+   │                           │                           │
+   ▼                           ▼                           ▼
+malloc(100)                 malloc(200)                 malloc(50)
+   │                           │                           │
+   ▼                           ▼                           ▼
+lock arena[1]               lock arena[2]               wait for arena[1]
+   │                           │                           │
+   ▼                           ▼                           ▼
+search free list            search free list                 │
+   │                           │                           │
+   ▼                           ▼                           ▼
+allocate block              allocate block              lock acquired
+   │                           │                           │
+   ▼                           ▼                           ▼
+unlock arena[1]             unlock arena[2]             search free list
+                                                           │
+                                                           ▼
+                                                      allocate block
+                                                           │
+                                                           ▼
+                                                      unlock arena[1]
+</code></pre></div></div>
+
+<p>This design reduces contention by distributing threads across multiple arenas, allowing parallel allocations in different arenas while maintaining thread safety within each arena.</p>
+
+<h3 id="memory-management-operation-examples">Memory Management Operation Examples</h3>
+
+<h3 id="malloc-operation-flow">malloc() Operation Flow</h3>
+
+<h4 id="heap-growth-with-sbrk">Heap Growth with sbrk()</h4>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Initial Heap:
+Program Break ──────────────────────────────┐
+                                            ▼
+┌─────────────┬─────────────┬──────────────┬──────────────────────────────────┐
+│   Block 1   │   Block 2   │   Block 3   │        Unused Space              │
+│ size: 64    │ size: 128   │ size: 32    │                                  │
+│ free: 0     │ free: 1     │ free: 0     │                                  │
+└─────────────┴─────────────┴─────────────┴──────────────────────────────────┘
+
+malloc(500) - No suitable free block found, need to extend heap:
+
+┌─────────────┬─────────────┬─────────────┬─────────────┬─────────────────────┐
+│   Block 1   │   Block 2   │   Block 3   │   Block 4   │    New Heap Space   │
+│ size: 64    │ size: 128   │ size: 32    │ size: 500   │                     │
+│ free: 0     │ free: 1     │ free: 0     │ free: 0     │                     │
+└─────────────┴─────────────┴─────────────┴─────────────┴─────────────────────┘
+                                          ^               ^
+                                      NEW BLOCK     NEW PROGRAM BREAK
+                                   (via sbrk(516))
+</code></pre></div></div>
+
+<h3 id="realloc-operation-examples">realloc() Operation Examples</h3>
+
+<h4 id="case-1-shrinking-realloc-smaller-size">Case 1: Shrinking (realloc smaller size)</h4>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Before: realloc(ptr, 50) where ptr points to 128-byte block
+┌─────────────┐
+│   Block     │
+│ size: 128   │
+│ free: 0     │
+└─────────────┘
+
+After: Split and return same pointer
+┌─────────────┐    ┌─────────────┐
+│   Block     │    │ Split Block │
+│ size: 50    │    │ size: 62    │
+│ free: 0     │    │ free: 1     │
+└─────────────┘    └─────────────┘
+</code></pre></div></div>
+
+<h4 id="case-2-growing-with-adjacent-free-block">Case 2: Growing with adjacent free block</h4>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Before: realloc(ptr, 200) 
+┌─────────────┐    ┌─────────────┐
+│   Block A   │    │   Block B   │
+│ size: 100   │    │ size: 150   │
+│ free: 0     │    │ free: 1     │
+└─────────────┘    └─────────────┘
+
+After: Coalesce and resize
+┌─────────────────────────────────┐    ┌─────────────┐
+│         Expanded Block          │    │ Remainder   │
+│ size: 200                       │    │ size: 34    │
+│ free: 0                         │    │ free: 1     │
+└─────────────────────────────────┘    └─────────────┘
+</code></pre></div></div>
+
+<h3 id="calloc-operation">calloc() Operation</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>calloc(10, 32) = calloc(320 total bytes)
+
+Step 1: Check for overflow
+if (10 * 32 overflows) return NULL;
+
+Step 2: Call malloc(320)
+┌─────────────┐
+│   Block     │
+│ size: 320   │
+│ free: 0     │
+└─────────────┘
+
+Step 3: Zero out memory
+┌─────────────┐
+│   Block     │  memset(ptr, 0, 320)
+│ 00000000... │  ←── All bytes set to 0
+│ 00000000... │
+└─────────────┘
+</code></pre></div></div>
 
 <hr>
 
