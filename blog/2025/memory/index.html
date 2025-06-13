@@ -827,31 +827,6 @@ arena-&gt;base
 
 <h4 id="first-fit-search">First-Fit Search</h4>
 
-<p>Our implementation uses a first-fit algorithm, which sounds exactly like what it does: we traverse the free list and take the first block that’s large enough to satisfy the request.</p>
-
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">static</span> <span class="n">block_meta</span> <span class="o">*</span><span class="nf">find_free_block</span><span class="p">(</span><span class="n">block_meta</span> <span class="o">**</span><span class="n">last</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">size</span><span class="p">,</span> <span class="n">arena_t</span> <span class="o">*</span><span class="n">a</span><span class="p">)</span> <span class="p">{</span>
-    <span class="n">block_meta</span> <span class="o">*</span><span class="n">current</span> <span class="o">=</span> <span class="n">a</span><span class="o">-&gt;</span><span class="n">base</span><span class="p">;</span>
-    <span class="o">*</span><span class="n">last</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
-    
-    <span class="k">while</span> <span class="p">(</span><span class="n">current</span><span class="p">)</span> <span class="p">{</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">current</span><span class="o">-&gt;</span><span class="n">free</span> <span class="o">&amp;&amp;</span> <span class="n">current</span><span class="o">-&gt;</span><span class="n">size</span> <span class="o">&gt;=</span> <span class="n">size</span><span class="p">)</span> <span class="p">{</span>
-            <span class="k">return</span> <span class="n">current</span><span class="p">;</span>  <span class="c1">// First fit</span>
-        <span class="p">}</span>
-        <span class="o">*</span><span class="n">last</span> <span class="o">=</span> <span class="n">current</span><span class="p">;</span>
-        <span class="n">current</span> <span class="o">=</span> <span class="n">current</span><span class="o">-&gt;</span><span class="n">next</span><span class="p">;</span>
-    <span class="p">}</span>
-    <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
-<span class="p">}</span>
-</code></pre></div></div>
-
-<p>Why first-fit over other strategies? The decision reflects our bias toward simplicity and reasonable performance. Best-fit algorithms, which find the smallest suitable block, can reduce fragmentation but require examining every free block—turning O(n) average case into O(n) guaranteed. Next-fit, which continues searching from where the last search ended, can improve locality but complicates the implementation and can lead to worse fragmentation patterns.</p>
-
-<p>First-fit offers a sweet spot: it’s simple to implement, has good average-case performance (often finding suitable blocks early in the list), and produces acceptable fragmentation characteristics. Studies have shown that for many real-world allocation patterns, first-fit performs nearly as well as more complex algorithms while being much easier to understand and debug.</p>
-
-<p>The function also tracks the last block examined, which proves crucial when we need to extend the heap. If no suitable block exists, we know exactly where to link new memory.</p>
-
-<h4 id="first-fit-search-visualization">First-Fit Search Visualization</h4>
-
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>malloc(100) - Searching for first fit:
 
 ┌─────────────┐    ┌─────────────┐        ┌─────────────┐    ┌─────────────┐
@@ -880,7 +855,13 @@ arena-&gt;base
 <span class="p">}</span>
 </code></pre></div></div>
 
-<h4 id="block-splitting-visualization">Block Splitting Visualization</h4>
+<p>Why first-fit over other strategies? The decision reflects our bias toward simplicity and reasonable performance. Best-fit algorithms, which find the smallest suitable block, can reduce fragmentation but require examining every free block—turning O(n) average case into O(n) guaranteed. Next-fit, which continues searching from where the last search ended, can improve locality but complicates the implementation and can lead to worse fragmentation patterns.</p>
+
+<p>First-fit offers a sweet spot: it’s simple to implement, has good average-case performance (often finding suitable blocks early in the list), and produces acceptable fragmentation characteristics. Studies have shown that for many real-world allocation patterns, first-fit performs nearly as well as more complex algorithms while being much easier to understand and debug.</p>
+
+<p>The function also tracks the last block examined, which proves crucial when we need to extend the heap. If no suitable block exists, we know exactly where to link new memory.</p>
+
+<h4 id="block-splitting">Block Splitting</h4>
 
 <p>When we find a free block larger than needed, we face a choice: waste the extra space or split the block. mini_malloc always attempts to split, but with an important caveat:</p>
 
@@ -899,10 +880,6 @@ After Split (malloc requested 100 bytes):
 └─────────────┘    └─────────────┘
    ALLOCATED         REMAINDER
 </code></pre></div></div>
-
-<h4 id="block-splitting">Block Splitting</h4>
-
-<p>When we find a free block larger than needed, we face a choice: waste the extra space or split the block. mini_malloc always attempts to split, but with an important caveat:</p>
 
 <div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">static</span> <span class="kt">void</span> <span class="nf">split_block</span><span class="p">(</span><span class="n">block_meta</span> <span class="o">*</span><span class="n">b</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">requested</span><span class="p">)</span> <span class="p">{</span>
     <span class="kt">size_t</span> <span class="n">min_split_size</span> <span class="o">=</span> <span class="n">META_SIZE</span> <span class="o">+</span> <span class="mi">8</span><span class="p">;</span>  <span class="c1">// Minimum useful remainder</span>
@@ -939,6 +916,24 @@ After Split (malloc requested 100 bytes):
 
 <p>When a block is freed, we check both its neighbors. If either is also free, we merge them into a single larger block. This process happens recursively—if we merge with the previous block, that combined block might now be adjacent to another free block.</p>
 
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Before Free:
+┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
+│   Block 1   │    │   Block 2   │    │   Block 3   │    │   Block 4   │
+│ size: 64    │    │ size: 128   │    │ size: 32    │    │ size: 256   │
+│ free: 0     │    │ free: 1     │    │ free: 0     │    │ free: 1     │
+└─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘
+
+free(Block 1) called:
+
+After Free and Coalescing:
+┌─────────────────────────────────┐    ┌─────────────┐    ┌─────────────┐
+│         Coalesced Block         │    │   Block 3   │    │   Block 4   │
+│ size: 64 + 16 + 128 = 208       │    │ size: 32    │    │ size: 256   │
+│ free: 1                         │    │ free: 0     │    │ free: 1     │
+└─────────────────────────────────┘    └─────────────┘    └─────────────┘
+  (Block 1 + META + Block 2)              (unchanged)        (unchanged)
+</code></pre></div></div>
+
 <div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">static</span> <span class="kt">void</span> <span class="nf">coalesce</span><span class="p">(</span><span class="n">block_meta</span> <span class="o">*</span><span class="n">b</span><span class="p">)</span> <span class="p">{</span>
     <span class="c1">// Forward coalescing</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">b</span><span class="o">-&gt;</span><span class="n">next</span> <span class="o">&amp;&amp;</span> <span class="n">b</span><span class="o">-&gt;</span><span class="n">next</span><span class="o">-&gt;</span><span class="n">free</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">b</span><span class="o">-&gt;</span><span class="n">next</span><span class="o">-&gt;</span><span class="n">use_mmap</span><span class="p">)</span> <span class="p">{</span>
@@ -969,28 +964,6 @@ After Split (malloc requested 100 bytes):
 <p>Consider what happens during backward coalescing: we’re effectively removing the current block from the list and expanding the previous block to encompass both. With our prev pointers, this is a simple pointer update. Without them, we’d need to search the entire list to find who points to us.</p>
 
 <p>This design decision exemplifies a common trade-off in systems programming: we spend extra memory (8 bytes per block for the prev pointer) to gain algorithmic efficiency. For an allocator that might manage thousands of blocks, the difference between O(1) and O(n) operations can be substantial.</p>
-
-<h4 id="coalescing-visualization">Coalescing Visualization</h4>
-
-<p>When a block is freed, we check both its neighbors. If either is also free, we merge them into a single larger block. This process happens recursively—if we merge with the previous block, that combined block might now be adjacent to another free block.</p>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Before Free:
-┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐
-│   Block 1   │    │   Block 2   │    │   Block 3   │    │   Block 4   │
-│ size: 64    │    │ size: 128   │    │ size: 32    │    │ size: 256   │
-│ free: 0     │    │ free: 1     │    │ free: 0     │    │ free: 1     │
-└─────────────┘    └─────────────┘    └─────────────┘    └─────────────┘
-
-free(Block 1) called:
-
-After Free and Coalescing:
-┌─────────────────────────────────┐    ┌─────────────┐    ┌─────────────┐
-│         Coalesced Block         │    │   Block 3   │    │   Block 4   │
-│ size: 64 + 16 + 128 = 208       │    │ size: 32    │    │ size: 256   │
-│ free: 1                         │    │ free: 0     │    │ free: 1     │
-└─────────────────────────────────┘    └─────────────┘    └─────────────┘
-  (Block 1 + META + Block 2)              (unchanged)        (unchanged)
-</code></pre></div></div>
 
 <h3 id="65-large-block-handling">6.5 Large Block Handling</h3>
 
