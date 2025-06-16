@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Level 1 mini_malloc: A Basic First-Fit Memory Allocator"
-date: 2025-06-16 12:12:12
+date: 2025-06-10 12:12:12
 description:  This document provides an in-depth look at the design and implementation of **mini_malloc**, a basic first-fit memory allocator in C. It covers the allocator's architecture, data structures, algorithms, and testing strategy for educational purposes.
 tags: concurrent c/c++ ds-and-algorithms
 categories: computer-sciences operating_systems
