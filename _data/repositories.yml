@@ -24,6 +24,8 @@ github_repos:
   - repo: EthanCornell/Gossip-protocol
   - repo: EthanCornell/Cache-replacement-policies
   - repo: EthanCornell/egos-2000
+  - repo: EthanCornell/mini_malloc
+    selected: true
   - repo: EthanCornell/harmony
   - repo: EthanCornell/2048
 
