@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "mini_malloc: A Basic First-Fit Memory Allocator"
+title: "Level 1 mini_malloc: A Basic First-Fit Memory Allocator"
 date: 2025-06-16 12:12:12
 description:  This document provides an in-depth look at the design and implementation of **mini_malloc**, a basic first-fit memory allocator in C. It covers the allocator's architecture, data structures, algorithms, and testing strategy for educational purposes.
 tags: concurrent c/c++ ds-and-algorithms
@@ -666,6 +666,30 @@ Whether used as a learning tool, a starting point for research, or a lightweight
 
 ---
 
+## References and Further Reading
+
+1. **Classic Papers**
+   - "Dynamic Storage Allocation: A Survey and Critical Review" - Wilson et al.
+   - "The Memory Fragmentation Problem: Solved?" - Johnstone & Wilson
+   - "Hoard: A Scalable Memory Allocator" - Berger et al.
+
+2. **Implementation References**
+   - Doug Lea's malloc (dlmalloc)
+   - GNU libc malloc (ptmalloc2)
+   - jemalloc technical documentation
+   - tcmalloc design document
+
+3. **Books**
+   - "The Art of Computer Programming, Vol. 1" - Knuth (Section 2.5)
+   - "Advanced Programming in the UNIX Environment" - Stevens
+   - "Computer Systems: A Programmer's Perspective" - Bryant & O'Hallaron
+
+4. **Online Resources**
+   - Memory Management Reference (www.memorymanagement.org)
+   - Malloc Tutorial (danluu.com)
+   - Allocator Benchmarks (github.com/emeryberger/)
+
+---
 ## Appendix: Complete Implementation
 
 ### mini_malloc.h
@@ -1318,36 +1342,5 @@ Total free memory: 296 bytes
 
 ```
 
-
 ---
-
-## References and Further Reading
-
-1. **Classic Papers**
-   - "Dynamic Storage Allocation: A Survey and Critical Review" - Wilson et al.
-   - "The Memory Fragmentation Problem: Solved?" - Johnstone & Wilson
-   - "Hoard: A Scalable Memory Allocator" - Berger et al.
-
-2. **Implementation References**
-   - Doug Lea's malloc (dlmalloc)
-   - GNU libc malloc (ptmalloc2)
-   - jemalloc technical documentation
-   - tcmalloc design document
-
-3. **Books**
-   - "The Art of Computer Programming, Vol. 1" - Knuth (Section 2.5)
-   - "Advanced Programming in the UNIX Environment" - Stevens
-   - "Computer Systems: A Programmer's Perspective" - Bryant & O'Hallaron
-
-4. **Online Resources**
-   - Memory Management Reference (www.memorymanagement.org)
-   - Malloc Tutorial (danluu.com)
-   - Allocator Benchmarks (github.com/emeryberger/)
-
----
-
-
 *This completes the technical documentation for mini_malloc, a basic but educational memory allocator implementation.*
-
-
-*End of Document*
