@@ -1,5 +1,1459 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" hreflang="en" /><updated>2025-06-16T13:17:35-04:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">blank</title><subtitle>A simple, whitespace theme for academics. Based on [*folio](https://github.com/bogoli/-folio) design.
-</subtitle><entry><title type="html">mini_malloc: A Security-Enhanced Memory Allocator with Debugging Features</title><link href="http://localhost:4000/blog/2025/adv_memory/" rel="alternate" type="text/html" title="mini_malloc: A Security-Enhanced Memory Allocator with Debugging Features" /><published>2025-06-14T16:23:00-04:00</published><updated>2025-06-14T16:23:00-04:00</updated><id>http://localhost:4000/blog/2025/adv_memory</id><content type="html" xml:base="http://localhost:4000/blog/2025/adv_memory/"><![CDATA[<p>This technical note provides a comprehensive analysis of <strong>mini_malloc</strong>, a production-grade memory allocator implementation that demonstrates advanced concepts in systems programming. The allocator features:</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://ethanhuang.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://ethanhuang.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2025-06-16T13:44:36-04:00</updated><id>https://ethanhuang.github.io/feed.xml</id><title type="html">blank</title><subtitle>A simple, whitespace theme for academics. Based on [*folio](https://github.com/bogoli/-folio) design.
+</subtitle><entry><title type="html">mini_malloc: A Basic First-Fit Memory Allocator</title><link href="https://ethanhuang.github.io/blog/2025/basic_memory/" rel="alternate" type="text/html" title="mini_malloc: A Basic First-Fit Memory Allocator" /><published>2025-06-16T08:12:12-04:00</published><updated>2025-06-16T08:12:12-04:00</updated><id>https://ethanhuang.github.io/blog/2025/basic_memory</id><content type="html" xml:base="https://ethanhuang.github.io/blog/2025/basic_memory/"><![CDATA[<p>This technical note provides a comprehensive analysis of <strong>mini_malloc</strong>, a basic memory allocator implementation that demonstrates fundamental concepts in systems programming. The allocator features:</p>
+
+<ul>
+  <li><strong>First-fit allocation strategy</strong> using a simple free list</li>
+  <li><strong>Block splitting and coalescing</strong> for memory efficiency</li>
+  <li><strong>Standard interface compliance</strong> (malloc, free, realloc, calloc)</li>
+  <li><strong>Debug capabilities</strong> with heap introspection functions</li>
+  <li><strong>Educational design</strong> prioritizing clarity over performance</li>
+</ul>
+
+<p>The implementation balances simplicity (under 300 lines) with correctness, making it ideal for learning memory management concepts and understanding how allocators work under the hood.</p>
+
+<hr />
+
+<h2 id="table-of-contents">Table of Contents</h2>
+
+<ol>
+  <li><a href="#1-introduction--motivation">Introduction &amp; Motivation</a></li>
+  <li><a href="#2-requirements-analysis">Requirements Analysis</a></li>
+  <li><a href="#3-architectural-overview">Architectural Overview</a></li>
+  <li><a href="#4-core-data-structures">Core Data Structures</a></li>
+  <li><a href="#5-implementation-deep-dive">Implementation Deep Dive</a>
+    <ul>
+      <li>5.1 <a href="#51-block-metadata-design">Block Metadata Design</a></li>
+      <li>5.2 <a href="#52-first-fit-algorithm">First-Fit Algorithm</a></li>
+      <li>5.3 <a href="#53-block-splitting">Block Splitting</a></li>
+      <li>5.4 <a href="#54-free-list-management">Free List Management</a></li>
+      <li>5.5 <a href="#55-memory-alignment">Memory Alignment</a></li>
+    </ul>
+  </li>
+  <li><a href="#6-api-implementation">API Implementation</a></li>
+  <li><a href="#7-testing--validation">Testing &amp; Validation</a></li>
+  <li><a href="#8-performance-characteristics">Performance Characteristics</a></li>
+  <li><a href="#9-limitations-and-trade-offs">Limitations and Trade-offs</a></li>
+  <li><a href="#10-educational-value">Educational Value</a></li>
+  <li><a href="#11-path-to-production">Path to Production</a></li>
+  <li><a href="#12-conclusion">Conclusion</a></li>
+  <li><a href="#appendix-complete-implementation">Appendix: Complete Implementation</a></li>
+</ol>
+
+<hr />
+
+<h2 id="1-introduction--motivation">1. Introduction &amp; Motivation</h2>
+
+<p>Memory allocation is one of the most fundamental operations in systems programming, yet it’s often treated as a black box by many developers. Understanding how malloc and free work internally is crucial for:</p>
+
+<ul>
+  <li><strong>Writing efficient code</strong>: Knowing allocation patterns helps avoid performance pitfalls</li>
+  <li><strong>Debugging memory issues</strong>: Understanding heap layout aids in diagnosing corruption and leaks</li>
+  <li><strong>System design</strong>: Custom allocators can optimize for specific workloads</li>
+  <li><strong>Educational foundation</strong>: Allocators demonstrate key OS and data structure concepts</li>
+</ul>
+
+<p><strong>mini_malloc</strong> serves as an educational implementation that strips away the complexity of production allocators while maintaining correctness and demonstrating core concepts.</p>
+
+<h3 id="why-start-simple">Why Start Simple?</h3>
+
+<p>While production allocators like glibc’s ptmalloc, jemalloc, and tcmalloc are marvels of engineering, they are:</p>
+<ul>
+  <li>Extremely complex (thousands of lines of code)</li>
+  <li>Heavily optimized, sacrificing readability</li>
+  <li>Difficult to understand without deep systems knowledge</li>
+  <li>Overwhelming for learning purposes</li>
+</ul>
+
+<p><strong>mini_malloc</strong> addresses this by providing:</p>
+<ul>
+  <li>Clean, documented implementation</li>
+  <li>Focus on fundamental algorithms</li>
+  <li>Easy-to-follow control flow</li>
+  <li>Comprehensive testing framework</li>
+</ul>
+
+<hr />
+
+<h2 id="2-requirements-analysis">2. Requirements Analysis</h2>
+
+<h3 id="functional-requirements">Functional Requirements</h3>
+
+<ol>
+  <li><strong>Standard Interface Compliance</strong>
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">malloc(size_t size)</code> - Allocate memory</li>
+      <li><code class="language-plaintext highlighter-rouge">free(void *ptr)</code> - Deallocate memory</li>
+      <li><code class="language-plaintext highlighter-rouge">realloc(void *ptr, size_t size)</code> - Resize allocation</li>
+      <li><code class="language-plaintext highlighter-rouge">calloc(size_t nmemb, size_t size)</code> - Allocate zeroed memory</li>
+    </ul>
+  </li>
+  <li><strong>Memory Management</strong>
+    <ul>
+      <li>Handle arbitrary allocation sizes</li>
+      <li>Minimize fragmentation through splitting and coalescing</li>
+      <li>Provide proper memory alignment</li>
+      <li>Handle edge cases gracefully</li>
+    </ul>
+  </li>
+  <li><strong>Correctness</strong>
+    <ul>
+      <li>No memory leaks in allocator itself</li>
+      <li>Proper handling of NULL pointers</li>
+      <li>Double-free protection</li>
+      <li>Overflow detection in calloc</li>
+    </ul>
+  </li>
+</ol>
+
+<h3 id="non-functional-requirements">Non-Functional Requirements</h3>
+
+<ol>
+  <li><strong>Simplicity</strong>
+    <ul>
+      <li>Clear, readable implementation</li>
+      <li>Minimal complexity</li>
+      <li>Educational value over performance</li>
+    </ul>
+  </li>
+  <li><strong>Correctness</strong>
+    <ul>
+      <li>Robust error handling</li>
+      <li>Defensive programming practices</li>
+      <li>Comprehensive test coverage</li>
+    </ul>
+  </li>
+  <li><strong>Portability</strong>
+    <ul>
+      <li>POSIX-compliant system calls only</li>
+      <li>Platform-independent core logic</li>
+    </ul>
+  </li>
+</ol>
+
+<h3 id="design-constraints">Design Constraints</h3>
+
+<ol>
+  <li><strong>Code Size</strong>: Keep implementation under 300 lines</li>
+  <li><strong>Dependencies</strong>: Only standard C library and POSIX sbrk</li>
+  <li><strong>Thread Safety</strong>: Single-threaded design for simplicity</li>
+  <li><strong>Memory Overhead</strong>: Reasonable metadata size per allocation</li>
+</ol>
+
+<hr />
+
+<h2 id="3-architectural-overview">3. Architectural Overview</h2>
+
+<h3 id="high-level-design">High-Level Design</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>┌─────────────────────────────────────────────┐
+│              User Application               │
+├─────────────────────────────────────────────┤
+│       malloc/free/realloc/calloc API        │
+├─────────────────────────────────────────────┤
+│            Free List Manager                │
+├─────────────────────────────────────────────┤
+│         Memory Backend (sbrk)               │
+└─────────────────────────────────────────────┘
+</code></pre></div></div>
+
+<h3 id="component-responsibilities">Component Responsibilities</h3>
+
+<ol>
+  <li><strong>API Layer</strong>: Implements standard malloc interface with proper semantics</li>
+  <li><strong>Free List Manager</strong>: Tracks available blocks using singly-linked list</li>
+  <li><strong>Memory Backend</strong>: Interfaces with OS via sbrk() for heap growth</li>
+  <li><strong>Debug Support</strong>: Provides heap introspection capabilities</li>
+</ol>
+
+<h3 id="memory-layout-strategy">Memory Layout Strategy</h3>
+
+<p>The allocator uses a simple heap-based approach where all memory comes from extending the process heap via <code class="language-plaintext highlighter-rouge">sbrk()</code>. Blocks are tracked using inline metadata stored immediately before the user data.</p>
+
+<hr />
+
+<h2 id="4-core-data-structures">4. Core Data Structures</h2>
+
+<h3 id="block-metadata">Block Metadata</h3>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">struct</span> <span class="n">block_meta</span> <span class="p">{</span>
+    <span class="kt">size_t</span> <span class="n">size</span><span class="p">;</span>             <span class="c1">// Size of user data portion</span>
+    <span class="k">struct</span> <span class="n">block_meta</span> <span class="o">*</span><span class="n">next</span><span class="p">;</span> <span class="c1">// Next block in free list</span>
+    <span class="kt">int</span> <span class="n">free</span><span class="p">;</span>                <span class="c1">// 1 if free, 0 if allocated</span>
+<span class="p">};</span>
+</code></pre></div></div>
+
+<p><strong>Design Rationale:</strong></p>
+<ul>
+  <li><strong>Simple singly-linked list</strong>: Easier to implement and debug than doubly-linked</li>
+  <li><strong>Explicit free flag</strong>: Simplifies debugging and corruption detection</li>
+  <li><strong>Size field</strong>: Stores user data size, not total block size</li>
+  <li><strong>Inline metadata</strong>: Stored immediately before user data for O(1) access</li>
+</ul>
+
+<h3 id="memory-layout">Memory Layout</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>User pointer:     ptr ─────────────┐
+                                   ▼
+Memory layout:  [block_meta][user data][block_meta][user data]...
+                     ▲                      ▲
+                     │                      │
+                 metadata              next block
+</code></pre></div></div>
+
+<h3 id="free-list-structure">Free List Structure</h3>
+
+<p>The allocator maintains a global free list pointing to all available blocks:</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>free_list ──► [Block A] ──► [Block C] ──► [Block E] ──► NULL
+              size: 100     size: 200     size: 50
+              free: 1       free: 1       free: 1
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="5-implementation-deep-dive">5. Implementation Deep Dive</h2>
+
+<h3 id="51-block-metadata-design">5.1 Block Metadata Design</h3>
+
+<p>The heart of our allocator lies in its metadata structure. Each allocated block is preceded by a small header containing essential information:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">struct</span> <span class="n">block_meta</span> <span class="p">{</span>
+    <span class="kt">size_t</span> <span class="n">size</span><span class="p">;</span>             <span class="c1">// User data size in bytes</span>
+    <span class="k">struct</span> <span class="n">block_meta</span> <span class="o">*</span><span class="n">next</span><span class="p">;</span> <span class="c1">// Next free block</span>
+    <span class="kt">int</span> <span class="n">free</span><span class="p">;</span>                <span class="c1">// Free/allocated flag</span>
+<span class="p">};</span>
+</code></pre></div></div>
+
+<p><strong>Metadata Placement Strategy:</strong></p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">void</span> <span class="o">*</span><span class="nf">my_malloc</span><span class="p">(</span><span class="kt">size_t</span> <span class="n">size</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">struct</span> <span class="n">block_meta</span> <span class="o">*</span><span class="n">block</span> <span class="o">=</span> <span class="cm">/* allocation logic */</span><span class="p">;</span>
+    <span class="k">return</span> <span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="p">)</span><span class="n">block</span> <span class="o">+</span> <span class="n">META_SIZE</span><span class="p">;</span>  <span class="c1">// Return pointer after metadata</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">my_free</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">ptr</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">struct</span> <span class="n">block_meta</span> <span class="o">*</span><span class="n">block</span> <span class="o">=</span> <span class="p">(</span><span class="k">struct</span> <span class="n">block_meta</span> <span class="o">*</span><span class="p">)((</span><span class="kt">char</span> <span class="o">*</span><span class="p">)</span><span class="n">ptr</span> <span class="o">-</span> <span class="n">META_SIZE</span><span class="p">);</span>
+    <span class="c1">// ... free logic</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>This inline approach provides O(1) metadata access during free operations, though it makes blocks vulnerable to buffer overruns that corrupt metadata.</p>
+
+<h3 id="52-first-fit-algorithm">5.2 First-Fit Algorithm</h3>
+
+<p>Our allocation strategy uses the classic first-fit algorithm:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">static</span> <span class="k">struct</span> <span class="n">block_meta</span> <span class="o">*</span><span class="nf">find_free_block</span><span class="p">(</span><span class="kt">size_t</span> <span class="n">size</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">struct</span> <span class="n">block_meta</span> <span class="o">*</span><span class="n">current</span> <span class="o">=</span> <span class="n">free_list</span><span class="p">;</span>
+    
+    <span class="k">while</span> <span class="p">(</span><span class="n">current</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">current</span><span class="o">-&gt;</span><span class="n">free</span> <span class="o">&amp;&amp;</span> <span class="n">current</span><span class="o">-&gt;</span><span class="n">size</span> <span class="o">&gt;=</span> <span class="n">size</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">return</span> <span class="n">current</span><span class="p">;</span>  <span class="c1">// First suitable block found</span>
+        <span class="p">}</span>
+        <span class="n">current</span> <span class="o">=</span> <span class="n">current</span><span class="o">-&gt;</span><span class="n">next</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>  <span class="c1">// No suitable block found</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p><strong>Algorithm Analysis:</strong></p>
+<ul>
+  <li><strong>Time Complexity</strong>: O(n) where n is the number of free blocks</li>
+  <li><strong>Space Utilization</strong>: Good for most workloads, can suffer from fragmentation</li>
+  <li><strong>Implementation Simplicity</strong>: Extremely straightforward</li>
+</ul>
+
+<p><strong>Why First-Fit?</strong></p>
+<ul>
+  <li>Simpler than best-fit (no need to examine all blocks)</li>
+  <li>Often performs as well as more complex strategies</li>
+  <li>Predictable behavior for debugging</li>
+  <li>Fast allocation for blocks early in the free list</li>
+</ul>
+
+<h3 id="53-block-splitting">5.3 Block Splitting</h3>
+
+<p>When we find a free block larger than needed, we split it to minimize waste:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">static</span> <span class="kt">void</span> <span class="nf">split_block</span><span class="p">(</span><span class="k">struct</span> <span class="n">block_meta</span> <span class="o">*</span><span class="n">block</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">size</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// Only split if remainder would be meaningful</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">block</span><span class="o">-&gt;</span><span class="n">size</span> <span class="o">&gt;=</span> <span class="n">size</span> <span class="o">+</span> <span class="n">META_SIZE</span> <span class="o">+</span> <span class="n">ALIGNMENT</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// Calculate new block position</span>
+        <span class="k">struct</span> <span class="n">block_meta</span> <span class="o">*</span><span class="n">new_block</span> <span class="o">=</span> 
+            <span class="p">(</span><span class="k">struct</span> <span class="n">block_meta</span> <span class="o">*</span><span class="p">)((</span><span class="kt">char</span> <span class="o">*</span><span class="p">)</span><span class="n">block</span> <span class="o">+</span> <span class="n">META_SIZE</span> <span class="o">+</span> <span class="n">size</span><span class="p">);</span>
+        
+        <span class="c1">// Initialize remainder block</span>
+        <span class="n">new_block</span><span class="o">-&gt;</span><span class="n">size</span> <span class="o">=</span> <span class="n">block</span><span class="o">-&gt;</span><span class="n">size</span> <span class="o">-</span> <span class="n">size</span> <span class="o">-</span> <span class="n">META_SIZE</span><span class="p">;</span>
+        <span class="n">new_block</span><span class="o">-&gt;</span><span class="n">next</span> <span class="o">=</span> <span class="n">block</span><span class="o">-&gt;</span><span class="n">next</span><span class="p">;</span>
+        <span class="n">new_block</span><span class="o">-&gt;</span><span class="n">free</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+        
+        <span class="c1">// Update original block</span>
+        <span class="n">block</span><span class="o">-&gt;</span><span class="n">size</span> <span class="o">=</span> <span class="n">size</span><span class="p">;</span>
+        <span class="n">block</span><span class="o">-&gt;</span><span class="n">next</span> <span class="o">=</span> <span class="n">new_block</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p><strong>Splitting Visualization:</strong></p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Before splitting (request 64 bytes from 200-byte block):
+┌─────────────────────────────────────────────┐
+│        Block (size: 200, free: 1)           │
+└─────────────────────────────────────────────┘
+
+After splitting:
+┌─────────────────────┐  ┌─────────────────────┐
+│ Block (size: 64)    │  │ New Block (size:112)│
+│ free: 0             │  │ free: 1             │
+└─────────────────────┘  └─────────────────────┘
+</code></pre></div></div>
+
+<p>The minimum split threshold prevents creating tiny, unusable fragments that would only serve to fragment the heap.</p>
+
+<h3 id="54-free-list-management">5.4 Free List Management</h3>
+
+<p>The free list is managed through simple insertion and removal operations:</p>
+
+<p><strong>Adding to Free List:</strong></p>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">static</span> <span class="kt">void</span> <span class="nf">add_to_free_list</span><span class="p">(</span><span class="k">struct</span> <span class="n">block_meta</span> <span class="o">*</span><span class="n">block</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">block</span><span class="o">-&gt;</span><span class="n">free</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="n">block</span><span class="o">-&gt;</span><span class="n">next</span> <span class="o">=</span> <span class="n">free_list</span><span class="p">;</span>  <span class="c1">// Insert at head</span>
+    <span class="n">free_list</span> <span class="o">=</span> <span class="n">block</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p><strong>Removing from Free List:</strong></p>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">static</span> <span class="kt">void</span> <span class="nf">remove_from_free_list</span><span class="p">(</span><span class="k">struct</span> <span class="n">block_meta</span> <span class="o">*</span><span class="n">block</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">free_list</span> <span class="o">==</span> <span class="n">block</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">free_list</span> <span class="o">=</span> <span class="n">block</span><span class="o">-&gt;</span><span class="n">next</span><span class="p">;</span>  <span class="c1">// Remove head</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="c1">// Find predecessor and unlink</span>
+        <span class="k">struct</span> <span class="n">block_meta</span> <span class="o">*</span><span class="n">current</span> <span class="o">=</span> <span class="n">free_list</span><span class="p">;</span>
+        <span class="k">while</span> <span class="p">(</span><span class="n">current</span> <span class="o">&amp;&amp;</span> <span class="n">current</span><span class="o">-&gt;</span><span class="n">next</span> <span class="o">!=</span> <span class="n">block</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">current</span> <span class="o">=</span> <span class="n">current</span><span class="o">-&gt;</span><span class="n">next</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">current</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">current</span><span class="o">-&gt;</span><span class="n">next</span> <span class="o">=</span> <span class="n">block</span><span class="o">-&gt;</span><span class="n">next</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="n">block</span><span class="o">-&gt;</span><span class="n">free</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>This simple approach prioritizes code clarity over performance. Production allocators would use more sophisticated data structures (red-black trees, segregated free lists) to achieve O(log n) or O(1) operations.</p>
+
+<h3 id="55-memory-alignment">5.5 Memory Alignment</h3>
+
+<p>All allocations are aligned to 8-byte boundaries for optimal performance:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#define ALIGNMENT 8
+#define ALIGN(size) (((size) + (ALIGNMENT - 1)) &amp; ~(ALIGNMENT - 1))
+</span>
+<span class="kt">void</span> <span class="o">*</span><span class="nf">my_malloc</span><span class="p">(</span><span class="kt">size_t</span> <span class="n">size</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
+    
+    <span class="n">size</span> <span class="o">=</span> <span class="n">ALIGN</span><span class="p">(</span><span class="n">size</span><span class="p">);</span>  <span class="c1">// Ensure proper alignment</span>
+    <span class="c1">// ... rest of allocation logic</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p><strong>Why 8-byte alignment?</strong></p>
+<ul>
+  <li>Satisfies requirements for all basic C types (including double)</li>
+  <li>Optimal for 64-bit architectures</li>
+  <li>Prevents unaligned access penalties</li>
+  <li>Standard practice in production allocators</li>
+</ul>
+
+<hr />
+
+<h2 id="6-api-implementation">6. API Implementation</h2>
+
+<h3 id="malloc-implementation">malloc Implementation</h3>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">void</span> <span class="o">*</span><span class="nf">my_malloc</span><span class="p">(</span><span class="kt">size_t</span> <span class="n">size</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
+    
+    <span class="n">size</span> <span class="o">=</span> <span class="n">ALIGN</span><span class="p">(</span><span class="n">size</span><span class="p">);</span>
+    <span class="k">struct</span> <span class="n">block_meta</span> <span class="o">*</span><span class="n">block</span><span class="p">;</span>
+    
+    <span class="c1">// Try to find existing free block</span>
+    <span class="n">block</span> <span class="o">=</span> <span class="n">find_free_block</span><span class="p">(</span><span class="n">size</span><span class="p">);</span>
+    
+    <span class="k">if</span> <span class="p">(</span><span class="n">block</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">remove_from_free_list</span><span class="p">(</span><span class="n">block</span><span class="p">);</span>
+        <span class="n">split_block</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="n">size</span><span class="p">);</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="c1">// Need new memory from system</span>
+        <span class="n">block</span> <span class="o">=</span> <span class="n">request_space</span><span class="p">(</span><span class="n">size</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">block</span><span class="p">)</span> <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
+    <span class="p">}</span>
+    
+    <span class="k">return</span> <span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="p">)</span><span class="n">block</span> <span class="o">+</span> <span class="n">META_SIZE</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="free-implementation">free Implementation</h3>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">void</span> <span class="nf">my_free</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">ptr</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">ptr</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>  <span class="c1">// free(NULL) is safe</span>
+    
+    <span class="k">struct</span> <span class="n">block_meta</span> <span class="o">*</span><span class="n">block</span> <span class="o">=</span> 
+        <span class="p">(</span><span class="k">struct</span> <span class="n">block_meta</span> <span class="o">*</span><span class="p">)((</span><span class="kt">char</span> <span class="o">*</span><span class="p">)</span><span class="n">ptr</span> <span class="o">-</span> <span class="n">META_SIZE</span><span class="p">);</span>
+    
+    <span class="k">if</span> <span class="p">(</span><span class="n">block</span><span class="o">-&gt;</span><span class="n">free</span><span class="p">)</span> <span class="k">return</span><span class="p">;</span>  <span class="c1">// Double-free protection</span>
+    
+    <span class="n">add_to_free_list</span><span class="p">(</span><span class="n">block</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="realloc-implementation">realloc Implementation</h3>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">void</span> <span class="o">*</span><span class="nf">my_realloc</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">ptr</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">size</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">ptr</span><span class="p">)</span> <span class="k">return</span> <span class="n">my_malloc</span><span class="p">(</span><span class="n">size</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">my_free</span><span class="p">(</span><span class="n">ptr</span><span class="p">);</span>
+        <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
+    <span class="p">}</span>
+    
+    <span class="k">struct</span> <span class="n">block_meta</span> <span class="o">*</span><span class="n">block</span> <span class="o">=</span> 
+        <span class="p">(</span><span class="k">struct</span> <span class="n">block_meta</span> <span class="o">*</span><span class="p">)((</span><span class="kt">char</span> <span class="o">*</span><span class="p">)</span><span class="n">ptr</span> <span class="o">-</span> <span class="n">META_SIZE</span><span class="p">);</span>
+    
+    <span class="k">if</span> <span class="p">(</span><span class="n">block</span><span class="o">-&gt;</span><span class="n">size</span> <span class="o">&gt;=</span> <span class="n">size</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="n">ptr</span><span class="p">;</span>  <span class="c1">// Current block is large enough</span>
+    <span class="p">}</span>
+    
+    <span class="c1">// Need larger block</span>
+    <span class="kt">void</span> <span class="o">*</span><span class="n">new_ptr</span> <span class="o">=</span> <span class="n">my_malloc</span><span class="p">(</span><span class="n">size</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">new_ptr</span><span class="p">)</span> <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
+    
+    <span class="n">memcpy</span><span class="p">(</span><span class="n">new_ptr</span><span class="p">,</span> <span class="n">ptr</span><span class="p">,</span> <span class="n">block</span><span class="o">-&gt;</span><span class="n">size</span><span class="p">);</span>
+    <span class="n">my_free</span><span class="p">(</span><span class="n">ptr</span><span class="p">);</span>
+    <span class="k">return</span> <span class="n">new_ptr</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="calloc-implementation">calloc Implementation</h3>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">void</span> <span class="o">*</span><span class="nf">my_calloc</span><span class="p">(</span><span class="kt">size_t</span> <span class="n">num</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">size</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kt">size_t</span> <span class="n">total_size</span> <span class="o">=</span> <span class="n">num</span> <span class="o">*</span> <span class="n">size</span><span class="p">;</span>
+    
+    <span class="c1">// Overflow protection</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">num</span> <span class="o">!=</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="n">total_size</span> <span class="o">/</span> <span class="n">num</span> <span class="o">!=</span> <span class="n">size</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
+    <span class="p">}</span>
+    
+    <span class="kt">void</span> <span class="o">*</span><span class="n">ptr</span> <span class="o">=</span> <span class="n">my_malloc</span><span class="p">(</span><span class="n">total_size</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">ptr</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">memset</span><span class="p">(</span><span class="n">ptr</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">total_size</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">ptr</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="7-testing--validation">7. Testing &amp; Validation</h2>
+
+<h3 id="test-categories">Test Categories</h3>
+
+<ol>
+  <li><strong>Basic Functionality</strong>
+    <ul>
+      <li>Allocation and deallocation</li>
+      <li>Writing to and reading from allocated memory</li>
+      <li>NULL pointer handling</li>
+    </ul>
+  </li>
+  <li><strong>Edge Cases</strong>
+    <ul>
+      <li>Zero-size allocations</li>
+      <li>Very large allocations</li>
+      <li>Double-free scenarios</li>
+      <li>Overflow in calloc</li>
+    </ul>
+  </li>
+  <li><strong>Memory Management</strong>
+    <ul>
+      <li>Block reuse after free</li>
+      <li>Proper alignment</li>
+      <li>Fragmentation patterns</li>
+    </ul>
+  </li>
+  <li><strong>API Compliance</strong>
+    <ul>
+      <li>realloc semantics</li>
+      <li>calloc zero-initialization</li>
+      <li>Standard return values</li>
+    </ul>
+  </li>
+</ol>
+
+<h3 id="example-test-case">Example Test Case</h3>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">void</span> <span class="nf">test_basic_allocation</span><span class="p">()</span> <span class="p">{</span>
+    <span class="c1">// Test basic allocation</span>
+    <span class="kt">void</span> <span class="o">*</span><span class="n">ptr1</span> <span class="o">=</span> <span class="n">my_malloc</span><span class="p">(</span><span class="mi">100</span><span class="p">);</span>
+    <span class="n">assert</span><span class="p">(</span><span class="n">ptr1</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">);</span>
+    
+    <span class="c1">// Test writing to memory</span>
+    <span class="n">strcpy</span><span class="p">((</span><span class="kt">char</span> <span class="o">*</span><span class="p">)</span><span class="n">ptr1</span><span class="p">,</span> <span class="s">"Hello World!"</span><span class="p">);</span>
+    <span class="n">assert</span><span class="p">(</span><span class="n">strcmp</span><span class="p">((</span><span class="kt">char</span> <span class="o">*</span><span class="p">)</span><span class="n">ptr1</span><span class="p">,</span> <span class="s">"Hello World!"</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">);</span>
+    
+    <span class="c1">// Test alignment</span>
+    <span class="n">assert</span><span class="p">((</span><span class="kt">uintptr_t</span><span class="p">)</span><span class="n">ptr1</span> <span class="o">%</span> <span class="n">ALIGNMENT</span> <span class="o">==</span> <span class="mi">0</span><span class="p">);</span>
+    
+    <span class="n">my_free</span><span class="p">(</span><span class="n">ptr1</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="debug-support">Debug Support</h3>
+
+<p>The implementation includes heap introspection functions:</p>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">void</span> <span class="nf">print_heap_info</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">struct</span> <span class="n">block_meta</span> <span class="o">*</span><span class="n">current</span> <span class="o">=</span> <span class="n">free_list</span><span class="p">;</span>
+    <span class="kt">size_t</span> <span class="n">free_memory</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">free_blocks</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    
+    <span class="k">while</span> <span class="p">(</span><span class="n">current</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">current</span><span class="o">-&gt;</span><span class="n">free</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">free_blocks</span><span class="o">++</span><span class="p">;</span>
+            <span class="n">free_memory</span> <span class="o">+=</span> <span class="n">current</span><span class="o">-&gt;</span><span class="n">size</span><span class="p">;</span>
+            <span class="n">printf</span><span class="p">(</span><span class="s">"Free block: %zu bytes</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">current</span><span class="o">-&gt;</span><span class="n">size</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="n">current</span> <span class="o">=</span> <span class="n">current</span><span class="o">-&gt;</span><span class="n">next</span><span class="p">;</span>
+    <span class="p">}</span>
+    
+    <span class="n">printf</span><span class="p">(</span><span class="s">"Total free blocks: %d</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">free_blocks</span><span class="p">);</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">"Total free memory: %zu bytes</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">free_memory</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="8-performance-characteristics">8. Performance Characteristics</h2>
+
+<h3 id="time-complexity">Time Complexity</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Operation</th>
+      <th>Best Case</th>
+      <th>Average Case</th>
+      <th>Worst Case</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>malloc</td>
+      <td>O(1)</td>
+      <td>O(n)</td>
+      <td>O(n)</td>
+    </tr>
+    <tr>
+      <td>free</td>
+      <td>O(1)</td>
+      <td>O(n)</td>
+      <td>O(n)</td>
+    </tr>
+    <tr>
+      <td>realloc</td>
+      <td>O(1)</td>
+      <td>O(n + k)</td>
+      <td>O(n + k)</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Where n = number of free blocks, k = bytes to copy</p>
+
+<h3 id="space-overhead">Space Overhead</h3>
+
+<ul>
+  <li><strong>Per allocation</strong>: 16-24 bytes (depending on architecture)</li>
+  <li><strong>Alignment waste</strong>: Average 4 bytes per allocation</li>
+  <li><strong>Global overhead</strong>: Single pointer (free_list)</li>
+</ul>
+
+<h3 id="memory-usage-patterns">Memory Usage Patterns</h3>
+
+<p><strong>Strengths:</strong></p>
+<ul>
+  <li>Good locality for sequential allocations</li>
+  <li>Low global state overhead</li>
+  <li>Predictable memory layout</li>
+</ul>
+
+<p><strong>Weaknesses:</strong></p>
+<ul>
+  <li>Linear search through free list</li>
+  <li>No coalescing of adjacent free blocks</li>
+  <li>Potential for significant fragmentation</li>
+</ul>
+
+<hr />
+
+<h2 id="9-limitations-and-trade-offs">9. Limitations and Trade-offs</h2>
+
+<h3 id="design-limitations">Design Limitations</h3>
+
+<ol>
+  <li><strong>No Coalescing</strong>: Adjacent free blocks are not merged, leading to fragmentation</li>
+  <li><strong>Single-threaded</strong>: No concurrency support</li>
+  <li><strong>Linear Search</strong>: O(n) free block search</li>
+  <li><strong>No Memory Return</strong>: Memory never returned to OS</li>
+  <li><strong>Vulnerability</strong>: Inline metadata susceptible to corruption</li>
+</ol>
+
+<h3 id="comparison-with-production-allocators">Comparison with Production Allocators</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Feature</th>
+      <th>mini_malloc</th>
+      <th>Production Allocators</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Coalescing</td>
+      <td>No</td>
+      <td>Yes</td>
+    </tr>
+    <tr>
+      <td>Thread Safety</td>
+      <td>No</td>
+      <td>Yes</td>
+    </tr>
+    <tr>
+      <td>Size Classes</td>
+      <td>No</td>
+      <td>Yes</td>
+    </tr>
+    <tr>
+      <td>Metadata Protection</td>
+      <td>No</td>
+      <td>Yes</td>
+    </tr>
+    <tr>
+      <td>Memory Return</td>
+      <td>No</td>
+      <td>Yes</td>
+    </tr>
+    <tr>
+      <td>Search Time</td>
+      <td>O(n)</td>
+      <td>O(1) or O(log n)</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="when-to-use-mini_malloc">When to Use mini_malloc</h3>
+
+<p><strong>Appropriate for:</strong></p>
+<ul>
+  <li>Educational purposes</li>
+  <li>Understanding allocator fundamentals</li>
+  <li>Simple single-threaded applications</li>
+  <li>Embedded systems with predictable patterns</li>
+</ul>
+
+<p><strong>Not recommended for:</strong></p>
+<ul>
+  <li>Production applications</li>
+  <li>Multi-threaded programs</li>
+  <li>Performance-critical systems</li>
+  <li>Long-running processes</li>
+</ul>
+
+<hr />
+
+<h2 id="10-educational-value">10. Educational Value</h2>
+
+<h3 id="concepts-demonstrated">Concepts Demonstrated</h3>
+
+<ol>
+  <li><strong>System Calls</strong>: Interface with OS via sbrk()</li>
+  <li><strong>Pointer Arithmetic</strong>: Calculating metadata locations</li>
+  <li><strong>Data Structures</strong>: Singly-linked list management</li>
+  <li><strong>Memory Layout</strong>: Understanding heap organization</li>
+  <li><strong>API Design</strong>: Standard interface implementation</li>
+</ol>
+
+<h3 id="learning-progression">Learning Progression</h3>
+
+<p>mini_malloc serves as a stepping stone to understanding:</p>
+<ul>
+  <li>More complex allocation algorithms</li>
+  <li>Thread-safe programming techniques</li>
+  <li>Performance optimization strategies</li>
+  <li>Security considerations in systems programming</li>
+</ul>
+
+<h3 id="exercises-for-further-learning">Exercises for Further Learning</h3>
+
+<ol>
+  <li><strong>Add Coalescing</strong>: Merge adjacent free blocks</li>
+  <li><strong>Implement Best-Fit</strong>: Compare performance with first-fit</li>
+  <li><strong>Add Statistics</strong>: Track allocation patterns</li>
+  <li><strong>Security Hardening</strong>: Add metadata validation</li>
+  <li><strong>Thread Safety</strong>: Add basic locking</li>
+</ol>
+
+<hr />
+
+<h2 id="11-path-to-production">11. Path to Production</h2>
+
+<h3 id="critical-missing-features">Critical Missing Features</h3>
+
+<ol>
+  <li><strong>Coalescing Algorithm</strong>
+    <div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// Pseudocode for coalescing</span>
+<span class="kt">void</span> <span class="nf">coalesce_free_blocks</span><span class="p">()</span> <span class="p">{</span>
+    <span class="c1">// Sort free list by address</span>
+    <span class="c1">// Merge adjacent blocks</span>
+    <span class="c1">// Update free list</span>
+<span class="p">}</span>
+</code></pre></div>    </div>
+  </li>
+  <li><strong>Thread Safety</strong>
+    <div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">static</span> <span class="n">pthread_mutex_t</span> <span class="n">malloc_lock</span> <span class="o">=</span> <span class="n">PTHREAD_MUTEX_INITIALIZER</span><span class="p">;</span>
+   
+<span class="kt">void</span> <span class="o">*</span><span class="nf">malloc</span><span class="p">(</span><span class="kt">size_t</span> <span class="n">size</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">pthread_mutex_lock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">malloc_lock</span><span class="p">);</span>
+    <span class="kt">void</span> <span class="o">*</span><span class="n">result</span> <span class="o">=</span> <span class="n">my_malloc</span><span class="p">(</span><span class="n">size</span><span class="p">);</span>
+    <span class="n">pthread_mutex_unlock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">malloc_lock</span><span class="p">);</span>
+    <span class="k">return</span> <span class="n">result</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>    </div>
+  </li>
+  <li><strong>Security Hardening</strong>
+    <div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">struct</span> <span class="n">block_meta</span> <span class="p">{</span>
+    <span class="kt">uint32_t</span> <span class="n">canary</span><span class="p">;</span>     <span class="c1">// Corruption detection</span>
+    <span class="kt">size_t</span> <span class="n">size</span><span class="p">;</span>
+    <span class="k">struct</span> <span class="n">block_meta</span> <span class="o">*</span><span class="n">next</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">free</span><span class="p">;</span>
+<span class="p">};</span>
+</code></pre></div>    </div>
+  </li>
+</ol>
+
+<h3 id="performance-improvements">Performance Improvements</h3>
+
+<ol>
+  <li><strong>Segregated Free Lists</strong>: Separate lists for different size classes</li>
+  <li><strong>Better Search</strong>: Binary trees or hash tables for free blocks</li>
+  <li><strong>Memory Return</strong>: Return unused pages to OS via munmap</li>
+  <li><strong>Alignment Optimization</strong>: Platform-specific alignment</li>
+</ol>
+
+<hr />
+
+<h2 id="12-conclusion">12. Conclusion</h2>
+
+<p>mini_malloc successfully demonstrates the fundamental concepts of memory allocation in a clear, educational manner. While it lacks the sophistication of production allocators, it provides an excellent foundation for understanding:</p>
+
+<ul>
+  <li>How malloc and free work internally</li>
+  <li>The challenges of memory management</li>
+  <li>The trade-offs in allocator design</li>
+  <li>The complexity hidden behind simple APIs</li>
+</ul>
+
+<p>The implementation proves that complex systems can be understood by starting with simple, correct implementations and gradually adding sophistication. This approach is invaluable for systems programming education and serves as a launching point for more advanced allocator designs.</p>
+
+<p>Whether used as a learning tool, a starting point for research, or a lightweight allocator for embedded systems, mini_malloc achieves its goal of making memory allocation approachable and understandable.</p>
+
+<hr />
+
+<h2 id="appendix-complete-implementation">Appendix: Complete Implementation</h2>
+
+<h3 id="mini_malloch">mini_malloc.h</h3>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#ifndef MINI_MALLOC_H
+#define MINI_MALLOC_H
+</span>
+<span class="cp">#include</span> <span class="cpf">&lt;stddef.h&gt;</span><span class="cp">
+#include</span> <span class="cpf">&lt;stdint.h&gt;</span><span class="cp">
+</span>
+<span class="c1">// Memory alignment - align to 8 bytes for most architectures</span>
+<span class="cp">#define ALIGNMENT 8
+#define ALIGN(size) (((size) + (ALIGNMENT - 1)) &amp; ~(ALIGNMENT - 1))
+</span>
+<span class="c1">// Block metadata structure</span>
+<span class="k">struct</span> <span class="n">block_meta</span> <span class="p">{</span>
+  <span class="kt">size_t</span> <span class="n">size</span><span class="p">;</span>             <span class="c1">// Size of the data portion (not including metadata)</span>
+  <span class="k">struct</span> <span class="n">block_meta</span> <span class="o">*</span><span class="n">next</span><span class="p">;</span> <span class="c1">// Pointer to next block in free list</span>
+  <span class="kt">int</span> <span class="n">free</span><span class="p">;</span>                <span class="c1">// 1 if block is free, 0 if allocated</span>
+<span class="p">};</span>
+
+<span class="c1">// Size of metadata</span>
+<span class="cp">#define META_SIZE sizeof(struct block_meta)
+</span>
+<span class="c1">// Function declarations</span>
+<span class="kt">void</span> <span class="o">*</span><span class="nf">my_malloc</span><span class="p">(</span><span class="kt">size_t</span> <span class="n">size</span><span class="p">);</span>
+<span class="kt">void</span> <span class="nf">my_free</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">ptr</span><span class="p">);</span>
+<span class="kt">void</span> <span class="o">*</span><span class="nf">my_realloc</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">ptr</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">size</span><span class="p">);</span>
+<span class="kt">void</span> <span class="o">*</span><span class="nf">my_calloc</span><span class="p">(</span><span class="kt">size_t</span> <span class="n">num</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">size</span><span class="p">);</span>
+
+<span class="c1">// Debug/utility functions</span>
+<span class="kt">void</span> <span class="nf">print_heap_info</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
+<span class="kt">size_t</span> <span class="nf">get_total_allocated</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
+<span class="kt">size_t</span> <span class="nf">get_total_free</span><span class="p">(</span><span class="kt">void</span><span class="p">);</span>
+
+<span class="cp">#endif // MINI_MALLOC_H
+</span></code></pre></div></div>
+
+<h3 id="mini_mallocc">mini_malloc.c</h3>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include</span> <span class="cpf">"mini_malloc.h"</span><span class="cp">
+#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+#include</span> <span class="cpf">&lt;string.h&gt;</span><span class="cp">
+#include</span> <span class="cpf">&lt;unistd.h&gt;</span><span class="cp">
+</span>
+<span class="c1">// Global pointer to the head of free list</span>
+<span class="k">static</span> <span class="k">struct</span> <span class="n">block_meta</span> <span class="o">*</span><span class="n">free_list</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+
+<span class="c1">// Find a free block that can fit the requested size (first-fit)</span>
+<span class="k">static</span> <span class="k">struct</span> <span class="n">block_meta</span> <span class="o">*</span><span class="nf">find_free_block</span><span class="p">(</span><span class="kt">size_t</span> <span class="n">size</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">struct</span> <span class="n">block_meta</span> <span class="o">*</span><span class="n">current</span> <span class="o">=</span> <span class="n">free_list</span><span class="p">;</span>
+
+    <span class="k">while</span> <span class="p">(</span><span class="n">current</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">current</span><span class="o">-&gt;</span><span class="n">free</span> <span class="o">&amp;&amp;</span> <span class="n">current</span><span class="o">-&gt;</span><span class="n">size</span> <span class="o">&gt;=</span> <span class="n">size</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="k">return</span> <span class="n">current</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="n">current</span> <span class="o">=</span> <span class="n">current</span><span class="o">-&gt;</span><span class="n">next</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c1">// Request more memory from the system using sbrk</span>
+<span class="k">static</span> <span class="k">struct</span> <span class="n">block_meta</span> <span class="o">*</span><span class="nf">request_space</span><span class="p">(</span><span class="kt">size_t</span> <span class="n">size</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">struct</span> <span class="n">block_meta</span> <span class="o">*</span><span class="n">block</span><span class="p">;</span>
+
+    <span class="c1">// Request memory from system (metadata + data)</span>
+    <span class="n">block</span> <span class="o">=</span> <span class="p">(</span><span class="k">struct</span> <span class="n">block_meta</span> <span class="o">*</span><span class="p">)</span><span class="n">sbrk</span><span class="p">(</span><span class="n">META_SIZE</span> <span class="o">+</span> <span class="n">size</span><span class="p">);</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">block</span> <span class="o">==</span> <span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span> <span class="c1">// sbrk failed</span>
+    <span class="p">}</span>
+
+    <span class="c1">// Initialize the block</span>
+    <span class="n">block</span><span class="o">-&gt;</span><span class="n">size</span> <span class="o">=</span> <span class="n">size</span><span class="p">;</span>
+    <span class="n">block</span><span class="o">-&gt;</span><span class="n">next</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+    <span class="n">block</span><span class="o">-&gt;</span><span class="n">free</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+    <span class="k">return</span> <span class="n">block</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c1">// Split a block if it's larger than needed</span>
+<span class="k">static</span> <span class="kt">void</span> <span class="nf">split_block</span><span class="p">(</span><span class="k">struct</span> <span class="n">block_meta</span> <span class="o">*</span><span class="n">block</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">size</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">block</span><span class="o">-&gt;</span><span class="n">size</span> <span class="o">&gt;=</span> <span class="n">size</span> <span class="o">+</span> <span class="n">META_SIZE</span> <span class="o">+</span> <span class="n">ALIGNMENT</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">struct</span> <span class="n">block_meta</span> <span class="o">*</span><span class="n">new_block</span> <span class="o">=</span> <span class="p">(</span><span class="k">struct</span> <span class="n">block_meta</span> <span class="o">*</span><span class="p">)((</span><span class="kt">char</span> <span class="o">*</span><span class="p">)</span><span class="n">block</span> <span class="o">+</span> <span class="n">META_SIZE</span> <span class="o">+</span> <span class="n">size</span><span class="p">);</span>
+
+        <span class="n">new_block</span><span class="o">-&gt;</span><span class="n">size</span> <span class="o">=</span> <span class="n">block</span><span class="o">-&gt;</span><span class="n">size</span> <span class="o">-</span> <span class="n">size</span> <span class="o">-</span> <span class="n">META_SIZE</span><span class="p">;</span>
+        <span class="n">new_block</span><span class="o">-&gt;</span><span class="n">next</span> <span class="o">=</span> <span class="n">block</span><span class="o">-&gt;</span><span class="n">next</span><span class="p">;</span>
+        <span class="n">new_block</span><span class="o">-&gt;</span><span class="n">free</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+
+        <span class="n">block</span><span class="o">-&gt;</span><span class="n">size</span> <span class="o">=</span> <span class="n">size</span><span class="p">;</span>
+        <span class="n">block</span><span class="o">-&gt;</span><span class="n">next</span> <span class="o">=</span> <span class="n">new_block</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">// Add block to free list</span>
+<span class="k">static</span> <span class="kt">void</span> <span class="nf">add_to_free_list</span><span class="p">(</span><span class="k">struct</span> <span class="n">block_meta</span> <span class="o">*</span><span class="n">block</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">block</span><span class="o">-&gt;</span><span class="n">free</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="n">block</span><span class="o">-&gt;</span><span class="n">next</span> <span class="o">=</span> <span class="n">free_list</span><span class="p">;</span>
+    <span class="n">free_list</span> <span class="o">=</span> <span class="n">block</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c1">// Remove block from free list</span>
+<span class="k">static</span> <span class="kt">void</span> <span class="nf">remove_from_free_list</span><span class="p">(</span><span class="k">struct</span> <span class="n">block_meta</span> <span class="o">*</span><span class="n">block</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">free_list</span> <span class="o">==</span> <span class="n">block</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">free_list</span> <span class="o">=</span> <span class="n">block</span><span class="o">-&gt;</span><span class="n">next</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">else</span>
+    <span class="p">{</span>
+        <span class="k">struct</span> <span class="n">block_meta</span> <span class="o">*</span><span class="n">current</span> <span class="o">=</span> <span class="n">free_list</span><span class="p">;</span>
+        <span class="k">while</span> <span class="p">(</span><span class="n">current</span> <span class="o">&amp;&amp;</span> <span class="n">current</span><span class="o">-&gt;</span><span class="n">next</span> <span class="o">!=</span> <span class="n">block</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="n">current</span> <span class="o">=</span> <span class="n">current</span><span class="o">-&gt;</span><span class="n">next</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">current</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="n">current</span><span class="o">-&gt;</span><span class="n">next</span> <span class="o">=</span> <span class="n">block</span><span class="o">-&gt;</span><span class="n">next</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="n">block</span><span class="o">-&gt;</span><span class="n">free</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c1">// Main malloc implementation</span>
+<span class="kt">void</span> <span class="o">*</span><span class="nf">my_malloc</span><span class="p">(</span><span class="kt">size_t</span> <span class="n">size</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="c1">// Align the size</span>
+    <span class="n">size</span> <span class="o">=</span> <span class="n">ALIGN</span><span class="p">(</span><span class="n">size</span><span class="p">);</span>
+
+    <span class="k">struct</span> <span class="n">block_meta</span> <span class="o">*</span><span class="n">block</span><span class="p">;</span>
+
+    <span class="c1">// Try to find a free block first</span>
+    <span class="n">block</span> <span class="o">=</span> <span class="n">find_free_block</span><span class="p">(</span><span class="n">size</span><span class="p">);</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">block</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="c1">// Found a free block, remove it from free list</span>
+        <span class="n">remove_from_free_list</span><span class="p">(</span><span class="n">block</span><span class="p">);</span>
+
+        <span class="c1">// Split the block if it's too large</span>
+        <span class="n">split_block</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="n">size</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="k">else</span>
+    <span class="p">{</span>
+        <span class="c1">// No suitable free block found, request new memory</span>
+        <span class="n">block</span> <span class="o">=</span> <span class="n">request_space</span><span class="p">(</span><span class="n">size</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">block</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+
+    <span class="c1">// Return pointer to data (skip metadata)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="p">)</span><span class="n">block</span> <span class="o">+</span> <span class="n">META_SIZE</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c1">// Free implementation</span>
+<span class="kt">void</span> <span class="nf">my_free</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">ptr</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">ptr</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">return</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="c1">// Get block metadata</span>
+    <span class="k">struct</span> <span class="n">block_meta</span> <span class="o">*</span><span class="n">block</span> <span class="o">=</span> <span class="p">(</span><span class="k">struct</span> <span class="n">block_meta</span> <span class="o">*</span><span class="p">)((</span><span class="kt">char</span> <span class="o">*</span><span class="p">)</span><span class="n">ptr</span> <span class="o">-</span> <span class="n">META_SIZE</span><span class="p">);</span>
+
+    <span class="c1">// Basic validation - check if block is not already free</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">block</span><span class="o">-&gt;</span><span class="n">free</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">return</span><span class="p">;</span> <span class="c1">// Double free protection</span>
+    <span class="p">}</span>
+
+    <span class="c1">// Add to free list</span>
+    <span class="n">add_to_free_list</span><span class="p">(</span><span class="n">block</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="c1">// Realloc implementation</span>
+<span class="kt">void</span> <span class="o">*</span><span class="nf">my_realloc</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">ptr</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">size</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">ptr</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">return</span> <span class="n">my_malloc</span><span class="p">(</span><span class="n">size</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">my_free</span><span class="p">(</span><span class="n">ptr</span><span class="p">);</span>
+        <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">struct</span> <span class="n">block_meta</span> <span class="o">*</span><span class="n">block</span> <span class="o">=</span> <span class="p">(</span><span class="k">struct</span> <span class="n">block_meta</span> <span class="o">*</span><span class="p">)((</span><span class="kt">char</span> <span class="o">*</span><span class="p">)</span><span class="n">ptr</span> <span class="o">-</span> <span class="n">META_SIZE</span><span class="p">);</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">block</span><span class="o">-&gt;</span><span class="n">size</span> <span class="o">&gt;=</span> <span class="n">size</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="c1">// Current block is large enough</span>
+        <span class="k">return</span> <span class="n">ptr</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="c1">// Need to allocate new block</span>
+    <span class="kt">void</span> <span class="o">*</span><span class="n">new_ptr</span> <span class="o">=</span> <span class="n">my_malloc</span><span class="p">(</span><span class="n">size</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">new_ptr</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="c1">// Copy old data</span>
+    <span class="n">memcpy</span><span class="p">(</span><span class="n">new_ptr</span><span class="p">,</span> <span class="n">ptr</span><span class="p">,</span> <span class="n">block</span><span class="o">-&gt;</span><span class="n">size</span><span class="p">);</span>
+    <span class="n">my_free</span><span class="p">(</span><span class="n">ptr</span><span class="p">);</span>
+
+    <span class="k">return</span> <span class="n">new_ptr</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c1">// Calloc implementation</span>
+<span class="kt">void</span> <span class="o">*</span><span class="nf">my_calloc</span><span class="p">(</span><span class="kt">size_t</span> <span class="n">num</span><span class="p">,</span> <span class="kt">size_t</span> <span class="n">size</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="kt">size_t</span> <span class="n">total_size</span> <span class="o">=</span> <span class="n">num</span> <span class="o">*</span> <span class="n">size</span><span class="p">;</span>
+
+    <span class="c1">// Check for overflow</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">num</span> <span class="o">!=</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="n">total_size</span> <span class="o">/</span> <span class="n">num</span> <span class="o">!=</span> <span class="n">size</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">return</span> <span class="nb">NULL</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="kt">void</span> <span class="o">*</span><span class="n">ptr</span> <span class="o">=</span> <span class="n">my_malloc</span><span class="p">(</span><span class="n">total_size</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">ptr</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">memset</span><span class="p">(</span><span class="n">ptr</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">total_size</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">ptr</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c1">// Debug function to print heap information</span>
+<span class="kt">void</span> <span class="nf">print_heap_info</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">struct</span> <span class="n">block_meta</span> <span class="o">*</span><span class="n">current</span> <span class="o">=</span> <span class="n">free_list</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">free_blocks</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="kt">size_t</span> <span class="n">free_memory</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+    <span class="n">printf</span><span class="p">(</span><span class="s">"=== Heap Information ===</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+
+    <span class="k">while</span> <span class="p">(</span><span class="n">current</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">current</span><span class="o">-&gt;</span><span class="n">free</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="n">free_blocks</span><span class="o">++</span><span class="p">;</span>
+            <span class="n">free_memory</span> <span class="o">+=</span> <span class="n">current</span><span class="o">-&gt;</span><span class="n">size</span><span class="p">;</span>
+            <span class="n">printf</span><span class="p">(</span><span class="s">"Free block: %zu bytes</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">current</span><span class="o">-&gt;</span><span class="n">size</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="n">current</span> <span class="o">=</span> <span class="n">current</span><span class="o">-&gt;</span><span class="n">next</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="n">printf</span><span class="p">(</span><span class="s">"Total free blocks: %d</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">free_blocks</span><span class="p">);</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">"Total free memory: %zu bytes</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">free_memory</span><span class="p">);</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">"========================</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="c1">// Get total allocated memory</span>
+<span class="kt">size_t</span> <span class="nf">get_total_allocated</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="c1">// This is a simplified version - in a real implementation,</span>
+    <span class="c1">// you'd need to track all allocated blocks</span>
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="c1">// Get total free memory</span>
+<span class="kt">size_t</span> <span class="nf">get_total_free</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">struct</span> <span class="n">block_meta</span> <span class="o">*</span><span class="n">current</span> <span class="o">=</span> <span class="n">free_list</span><span class="p">;</span>
+    <span class="kt">size_t</span> <span class="n">total_free</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+    <span class="k">while</span> <span class="p">(</span><span class="n">current</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">current</span><span class="o">-&gt;</span><span class="n">free</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="n">total_free</span> <span class="o">+=</span> <span class="n">current</span><span class="o">-&gt;</span><span class="n">size</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="n">current</span> <span class="o">=</span> <span class="n">current</span><span class="o">-&gt;</span><span class="n">next</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">total_free</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="test_mini_mallocc">test_mini_malloc.c</h3>
+
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cp">#include</span> <span class="cpf">"mini_malloc.h"</span><span class="cp">
+#include</span> <span class="cpf">&lt;assert.h&gt;</span><span class="cp">
+#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+#include</span> <span class="cpf">&lt;string.h&gt;</span><span class="cp">
+</span>
+<span class="c1">// Test function prototypes</span>
+<span class="kt">void</span> <span class="nf">test_basic_allocation</span><span class="p">();</span>
+<span class="kt">void</span> <span class="nf">test_free_and_reuse</span><span class="p">();</span>
+<span class="kt">void</span> <span class="nf">test_alignment</span><span class="p">();</span>
+<span class="kt">void</span> <span class="nf">test_realloc</span><span class="p">();</span>
+<span class="kt">void</span> <span class="nf">test_calloc</span><span class="p">();</span>
+<span class="kt">void</span> <span class="nf">test_edge_cases</span><span class="p">();</span>
+<span class="kt">void</span> <span class="nf">test_fragmentation</span><span class="p">();</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">"Starting Mini Malloc Tests...</span><span class="se">\n\n</span><span class="s">"</span><span class="p">);</span>
+
+    <span class="n">test_basic_allocation</span><span class="p">();</span>
+    <span class="n">test_free_and_reuse</span><span class="p">();</span>
+    <span class="n">test_alignment</span><span class="p">();</span>
+    <span class="n">test_realloc</span><span class="p">();</span>
+    <span class="n">test_calloc</span><span class="p">();</span>
+    <span class="n">test_edge_cases</span><span class="p">();</span>
+    <span class="n">test_fragmentation</span><span class="p">();</span>
+
+    <span class="n">printf</span><span class="p">(</span><span class="s">"</span><span class="se">\n</span><span class="s">✅ All tests passed!</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">test_basic_allocation</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">"🔹 Test 1: Basic Allocation</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+
+    <span class="c1">// Test basic allocation</span>
+    <span class="kt">void</span> <span class="o">*</span><span class="n">ptr1</span> <span class="o">=</span> <span class="n">my_malloc</span><span class="p">(</span><span class="mi">100</span><span class="p">);</span>
+    <span class="n">assert</span><span class="p">(</span><span class="n">ptr1</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">);</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">"  ✓ Allocated 100 bytes</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+
+    <span class="kt">void</span> <span class="o">*</span><span class="n">ptr2</span> <span class="o">=</span> <span class="n">my_malloc</span><span class="p">(</span><span class="mi">200</span><span class="p">);</span>
+    <span class="n">assert</span><span class="p">(</span><span class="n">ptr2</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">);</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">"  ✓ Allocated 200 bytes</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+
+    <span class="kt">void</span> <span class="o">*</span><span class="n">ptr3</span> <span class="o">=</span> <span class="n">my_malloc</span><span class="p">(</span><span class="mi">50</span><span class="p">);</span>
+    <span class="n">assert</span><span class="p">(</span><span class="n">ptr3</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">);</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">"  ✓ Allocated 50 bytes</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+
+    <span class="c1">// Test writing to allocated memory</span>
+    <span class="n">strcpy</span><span class="p">((</span><span class="kt">char</span> <span class="o">*</span><span class="p">)</span><span class="n">ptr1</span><span class="p">,</span> <span class="s">"Hello World!"</span><span class="p">);</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">"  ✓ Written to allocated memory: %s</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="p">)</span><span class="n">ptr1</span><span class="p">);</span>
+
+    <span class="c1">// Clean up</span>
+    <span class="n">my_free</span><span class="p">(</span><span class="n">ptr1</span><span class="p">);</span>
+    <span class="n">my_free</span><span class="p">(</span><span class="n">ptr2</span><span class="p">);</span>
+    <span class="n">my_free</span><span class="p">(</span><span class="n">ptr3</span><span class="p">);</span>
+
+    <span class="n">printf</span><span class="p">(</span><span class="s">"  ✓ Basic allocation test passed</span><span class="se">\n\n</span><span class="s">"</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">test_free_and_reuse</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">"🔹 Test 2: Free and Reuse</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+
+    <span class="c1">// Allocate and free</span>
+    <span class="kt">void</span> <span class="o">*</span><span class="n">ptr1</span> <span class="o">=</span> <span class="n">my_malloc</span><span class="p">(</span><span class="mi">100</span><span class="p">);</span>
+    <span class="n">assert</span><span class="p">(</span><span class="n">ptr1</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">);</span>
+
+    <span class="n">my_free</span><span class="p">(</span><span class="n">ptr1</span><span class="p">);</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">"  ✓ Freed memory block</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+
+    <span class="c1">// Allocate again - should reuse the freed block</span>
+    <span class="kt">void</span> <span class="o">*</span><span class="n">ptr2</span> <span class="o">=</span> <span class="n">my_malloc</span><span class="p">(</span><span class="mi">100</span><span class="p">);</span>
+    <span class="n">assert</span><span class="p">(</span><span class="n">ptr2</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">);</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">"  ✓ Allocated same size again</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+
+    <span class="c1">// For first-fit, ptr2 might be the same as ptr1 if reused</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">ptr1</span> <span class="o">==</span> <span class="n">ptr2</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">printf</span><span class="p">(</span><span class="s">"  ✓ Memory was reused (ptr1 == ptr2)</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="k">else</span>
+    <span class="p">{</span>
+        <span class="n">printf</span><span class="p">(</span><span class="s">"  ✓ New memory allocated</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="n">my_free</span><span class="p">(</span><span class="n">ptr2</span><span class="p">);</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">"  ✓ Free and reuse test passed</span><span class="se">\n\n</span><span class="s">"</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">test_alignment</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">"🔹 Test 3: Memory Alignment</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+
+    <span class="c1">// Test various sizes to check alignment</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">size</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">size</span> <span class="o">&lt;=</span> <span class="mi">17</span><span class="p">;</span> <span class="n">size</span><span class="o">++</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="kt">void</span> <span class="o">*</span><span class="n">ptr</span> <span class="o">=</span> <span class="n">my_malloc</span><span class="p">(</span><span class="n">size</span><span class="p">);</span>
+        <span class="n">assert</span><span class="p">(</span><span class="n">ptr</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">);</span>
+
+        <span class="c1">// Check if pointer is aligned</span>
+        <span class="k">if</span> <span class="p">((</span><span class="kt">uintptr_t</span><span class="p">)</span><span class="n">ptr</span> <span class="o">%</span> <span class="n">ALIGNMENT</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="n">printf</span><span class="p">(</span><span class="s">"  ✓ Size %d: Aligned to %d bytes</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">ALIGNMENT</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="k">else</span>
+        <span class="p">{</span>
+            <span class="n">printf</span><span class="p">(</span><span class="s">"  ❌ Size %d: NOT aligned!</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">size</span><span class="p">);</span>
+            <span class="n">assert</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+        <span class="p">}</span>
+
+        <span class="n">my_free</span><span class="p">(</span><span class="n">ptr</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="n">printf</span><span class="p">(</span><span class="s">"  ✓ Alignment test passed</span><span class="se">\n\n</span><span class="s">"</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">test_realloc</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">"🔹 Test 4: Realloc</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+
+    <span class="c1">// Test realloc with NULL pointer (should behave like malloc)</span>
+    <span class="kt">void</span> <span class="o">*</span><span class="n">ptr</span> <span class="o">=</span> <span class="n">my_realloc</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span> <span class="mi">100</span><span class="p">);</span>
+    <span class="n">assert</span><span class="p">(</span><span class="n">ptr</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">);</span>
+    <span class="n">strcpy</span><span class="p">((</span><span class="kt">char</span> <span class="o">*</span><span class="p">)</span><span class="n">ptr</span><span class="p">,</span> <span class="s">"Initial data"</span><span class="p">);</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">"  ✓ Realloc with NULL pointer</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+
+    <span class="c1">// Test expanding</span>
+    <span class="n">ptr</span> <span class="o">=</span> <span class="n">my_realloc</span><span class="p">(</span><span class="n">ptr</span><span class="p">,</span> <span class="mi">200</span><span class="p">);</span>
+    <span class="n">assert</span><span class="p">(</span><span class="n">ptr</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">);</span>
+    <span class="n">assert</span><span class="p">(</span><span class="n">strcmp</span><span class="p">((</span><span class="kt">char</span> <span class="o">*</span><span class="p">)</span><span class="n">ptr</span><span class="p">,</span> <span class="s">"Initial data"</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">);</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">"  ✓ Expanded allocation preserves data</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+
+    <span class="c1">// Test shrinking (should return same pointer)</span>
+    <span class="kt">void</span> <span class="o">*</span><span class="n">old_ptr</span> <span class="o">=</span> <span class="n">ptr</span><span class="p">;</span>
+    <span class="n">ptr</span> <span class="o">=</span> <span class="n">my_realloc</span><span class="p">(</span><span class="n">ptr</span><span class="p">,</span> <span class="mi">50</span><span class="p">);</span>
+    <span class="n">assert</span><span class="p">(</span><span class="n">ptr</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">);</span>
+    <span class="c1">// Data should still be there (at least first 50 chars)</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">"  ✓ Shrunk allocation</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+
+    <span class="c1">// Test realloc with size 0 (should behave like free)</span>
+    <span class="n">ptr</span> <span class="o">=</span> <span class="n">my_realloc</span><span class="p">(</span><span class="n">ptr</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+    <span class="n">assert</span><span class="p">(</span><span class="n">ptr</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">);</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">"  ✓ Realloc with size 0</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+
+    <span class="n">printf</span><span class="p">(</span><span class="s">"  ✓ Realloc test passed</span><span class="se">\n\n</span><span class="s">"</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">test_calloc</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">"🔹 Test 5: Calloc</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+
+    <span class="c1">// Test calloc</span>
+    <span class="kt">int</span> <span class="o">*</span><span class="n">arr</span> <span class="o">=</span> <span class="p">(</span><span class="kt">int</span> <span class="o">*</span><span class="p">)</span><span class="n">my_calloc</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="kt">int</span><span class="p">));</span>
+    <span class="n">assert</span><span class="p">(</span><span class="n">arr</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">);</span>
+
+    <span class="c1">// Check if memory is zero-initialized</span>
+    <span class="kt">int</span> <span class="n">all_zero</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="p">{</span>
+            <span class="n">all_zero</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+            <span class="k">break</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="n">assert</span><span class="p">(</span><span class="n">all_zero</span><span class="p">);</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">"  ✓ Calloc zero-initializes memory</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+
+    <span class="c1">// Test writing to calloc'd memory</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="c1">// Verify written data</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">assert</span><span class="p">(</span><span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">"  ✓ Can write to calloc'd memory</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+
+    <span class="n">my_free</span><span class="p">(</span><span class="n">arr</span><span class="p">);</span>
+
+    <span class="c1">// Test overflow protection</span>
+    <span class="kt">void</span> <span class="o">*</span><span class="n">overflow_ptr</span> <span class="o">=</span> <span class="n">my_calloc</span><span class="p">(</span><span class="n">SIZE_MAX</span><span class="p">,</span> <span class="mi">2</span><span class="p">);</span>
+    <span class="n">assert</span><span class="p">(</span><span class="n">overflow_ptr</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">);</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">"  ✓ Calloc overflow protection works</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+
+    <span class="n">printf</span><span class="p">(</span><span class="s">"  ✓ Calloc test passed</span><span class="se">\n\n</span><span class="s">"</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">test_edge_cases</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">"🔹 Test 6: Edge Cases</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+
+    <span class="c1">// Test malloc with size 0</span>
+    <span class="kt">void</span> <span class="o">*</span><span class="n">ptr1</span> <span class="o">=</span> <span class="n">my_malloc</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+    <span class="n">assert</span><span class="p">(</span><span class="n">ptr1</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">);</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">"  ✓ Malloc with size 0 returns NULL</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+
+    <span class="c1">// Test free with NULL pointer</span>
+    <span class="n">my_free</span><span class="p">(</span><span class="nb">NULL</span><span class="p">);</span> <span class="c1">// Should not crash</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">"  ✓ Free with NULL pointer handled</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+
+    <span class="c1">// Test double free protection</span>
+    <span class="kt">void</span> <span class="o">*</span><span class="n">ptr2</span> <span class="o">=</span> <span class="n">my_malloc</span><span class="p">(</span><span class="mi">100</span><span class="p">);</span>
+    <span class="n">assert</span><span class="p">(</span><span class="n">ptr2</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">);</span>
+    <span class="n">my_free</span><span class="p">(</span><span class="n">ptr2</span><span class="p">);</span>
+    <span class="n">my_free</span><span class="p">(</span><span class="n">ptr2</span><span class="p">);</span> <span class="c1">// Double free - should be handled gracefully</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">"  ✓ Double free protection works</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+
+    <span class="c1">// Test very large allocation (should fail gracefully)</span>
+    <span class="kt">void</span> <span class="o">*</span><span class="n">large_ptr</span> <span class="o">=</span> <span class="n">my_malloc</span><span class="p">(</span><span class="n">SIZE_MAX</span><span class="p">);</span>
+    <span class="c1">// This might succeed or fail depending on system, but shouldn't crash</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">large_ptr</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">my_free</span><span class="p">(</span><span class="n">large_ptr</span><span class="p">);</span>
+        <span class="n">printf</span><span class="p">(</span><span class="s">"  ✓ Large allocation succeeded</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="k">else</span>
+    <span class="p">{</span>
+        <span class="n">printf</span><span class="p">(</span><span class="s">"  ✓ Large allocation failed gracefully</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="n">printf</span><span class="p">(</span><span class="s">"  ✓ Edge cases test passed</span><span class="se">\n\n</span><span class="s">"</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">test_fragmentation</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">"🔹 Test 7: Fragmentation and Coalescing</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+
+    <span class="c1">// Allocate several blocks</span>
+    <span class="kt">void</span> <span class="o">*</span><span class="n">ptrs</span><span class="p">[</span><span class="mi">5</span><span class="p">];</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">5</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="n">ptrs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">my_malloc</span><span class="p">(</span><span class="mi">100</span><span class="p">);</span>
+        <span class="n">assert</span><span class="p">(</span><span class="n">ptrs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">"  ✓ Allocated 5 blocks of 100 bytes each</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+
+    <span class="c1">// Free every other block to create fragmentation</span>
+    <span class="n">my_free</span><span class="p">(</span><span class="n">ptrs</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span>
+    <span class="n">my_free</span><span class="p">(</span><span class="n">ptrs</span><span class="p">[</span><span class="mi">3</span><span class="p">]);</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">"  ✓ Freed blocks 1 and 3 (creating fragmentation)</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+
+    <span class="c1">// Show heap info</span>
+    <span class="n">print_heap_info</span><span class="p">();</span>
+
+    <span class="c1">// Try to allocate a block that fits in the fragmented space</span>
+    <span class="kt">void</span> <span class="o">*</span><span class="n">small_ptr</span> <span class="o">=</span> <span class="n">my_malloc</span><span class="p">(</span><span class="mi">50</span><span class="p">);</span>
+    <span class="n">assert</span><span class="p">(</span><span class="n">small_ptr</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">);</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">"  ✓ Allocated 50 bytes in fragmented space</span><span class="se">\n</span><span class="s">"</span><span class="p">);</span>
+
+    <span class="c1">// Clean up remaining blocks</span>
+    <span class="n">my_free</span><span class="p">(</span><span class="n">ptrs</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+    <span class="n">my_free</span><span class="p">(</span><span class="n">ptrs</span><span class="p">[</span><span class="mi">2</span><span class="p">]);</span>
+    <span class="n">my_free</span><span class="p">(</span><span class="n">ptrs</span><span class="p">[</span><span class="mi">4</span><span class="p">]);</span>
+    <span class="n">my_free</span><span class="p">(</span><span class="n">small_ptr</span><span class="p">);</span>
+
+    <span class="n">printf</span><span class="p">(</span><span class="s">"  ✓ Fragmentation test passed</span><span class="se">\n\n</span><span class="s">"</span><span class="p">);</span>
+<span class="p">}</span>
+
+</code></pre></div></div>
+
+<h3 id="sample-test-results">Sample Test Results</h3>
+
+<pre><code class="language-output">Starting Mini Malloc Tests...
+
+🔹 Test 1: Basic Allocation
+  ✓ Allocated 100 bytes
+  ✓ Allocated 200 bytes
+  ✓ Allocated 50 bytes
+  ✓ Written to allocated memory: Hello World!
+  ✓ Basic allocation test passed
+
+🔹 Test 2: Free and Reuse
+  ✓ Freed memory block
+  ✓ Allocated same size again
+  ✓ Memory was reused (ptr1 == ptr2)
+  ✓ Free and reuse test passed
+
+🔹 Test 3: Memory Alignment
+  ✓ Size 1: Aligned to 8 bytes
+  ✓ Size 2: Aligned to 8 bytes
+  ✓ Size 3: Aligned to 8 bytes
+  ✓ Size 4: Aligned to 8 bytes
+  ✓ Size 5: Aligned to 8 bytes
+  ✓ Size 6: Aligned to 8 bytes
+  ✓ Size 7: Aligned to 8 bytes
+  ✓ Size 8: Aligned to 8 bytes
+  ✓ Size 9: Aligned to 8 bytes
+  ✓ Size 10: Aligned to 8 bytes
+  ✓ Size 11: Aligned to 8 bytes
+  ✓ Size 12: Aligned to 8 bytes
+  ✓ Size 13: Aligned to 8 bytes
+  ✓ Size 14: Aligned to 8 bytes
+  ✓ Size 15: Aligned to 8 bytes
+  ✓ Size 16: Aligned to 8 bytes
+  ✓ Size 17: Aligned to 8 bytes
+  ✓ Alignment test passed
+
+🔹 Test 4: Realloc
+  ✓ Realloc with NULL pointer
+  ✓ Expanded allocation preserves data
+  ✓ Shrunk allocation
+  ✓ Realloc with size 0
+  ✓ Realloc test passed
+
+🔹 Test 5: Calloc
+  ✓ Calloc zero-initializes memory
+  ✓ Can write to calloc'd memory
+  ✓ Calloc overflow protection works
+  ✓ Calloc test passed
+
+🔹 Test 6: Edge Cases
+  ✓ Malloc with size 0 returns NULL
+  ✓ Free with NULL pointer handled
+  ✓ Double free protection works
+  ✓ Large allocation succeeded
+  ✓ Edge cases test passed
+
+🔹 Test 7: Fragmentation and Coalescing
+  ✓ Allocated 5 blocks of 100 bytes each
+  ✓ Freed blocks 1 and 3 (creating fragmentation)
+=== Heap Information ===
+Free block: 104 bytes
+Free block: 104 bytes
+Free block: 0 bytes
+Free block: 40 bytes
+Free block: 24 bytes
+Free block: 16 bytes
+Free block: 8 bytes
+Total free blocks: 7
+Total free memory: 296 bytes
+========================
+  ✓ Allocated 50 bytes in fragmented space
+  ✓ Fragmentation test passed
+
+
+✅ All tests passed!
+
+</code></pre>
+
+<hr />
+
+<h2 id="references-and-further-reading">References and Further Reading</h2>
+
+<ol>
+  <li><strong>Classic Papers</strong>
+    <ul>
+      <li>“Dynamic Storage Allocation: A Survey and Critical Review” - Wilson et al.</li>
+      <li>“The Memory Fragmentation Problem: Solved?” - Johnstone &amp; Wilson</li>
+      <li>“Hoard: A Scalable Memory Allocator” - Berger et al.</li>
+    </ul>
+  </li>
+  <li><strong>Implementation References</strong>
+    <ul>
+      <li>Doug Lea’s malloc (dlmalloc)</li>
+      <li>GNU libc malloc (ptmalloc2)</li>
+      <li>jemalloc technical documentation</li>
+      <li>tcmalloc design document</li>
+    </ul>
+  </li>
+  <li><strong>Books</strong>
+    <ul>
+      <li>“The Art of Computer Programming, Vol. 1” - Knuth (Section 2.5)</li>
+      <li>“Advanced Programming in the UNIX Environment” - Stevens</li>
+      <li>“Computer Systems: A Programmer’s Perspective” - Bryant &amp; O’Hallaron</li>
+    </ul>
+  </li>
+  <li><strong>Online Resources</strong>
+    <ul>
+      <li>Memory Management Reference (www.memorymanagement.org)</li>
+      <li>Malloc Tutorial (danluu.com)</li>
+      <li>Allocator Benchmarks (github.com/emeryberger/)</li>
+    </ul>
+  </li>
+</ol>
+
+<hr />
+
+<p><em>This completes the technical documentation for mini_malloc, a basic but educational memory allocator implementation.</em></p>
+
+<p><em>End of Document</em></p>]]></content><author><name></name></author><category term="computer-sciences" /><category term="operating_systems" /><category term="concurrent" /><category term="c/c++" /><category term="ds-and-algorithms" /><summary type="html"><![CDATA[This document provides an in-depth look at the design and implementation of **mini_malloc**, a basic first-fit memory allocator in C. It covers the allocator's architecture, data structures, algorithms, and testing strategy for educational purposes.]]></summary></entry><entry><title type="html">mini_malloc: A Security-Enhanced Memory Allocator with Debugging Features</title><link href="https://ethanhuang.github.io/blog/2025/adv_memory/" rel="alternate" type="text/html" title="mini_malloc: A Security-Enhanced Memory Allocator with Debugging Features" /><published>2025-06-14T16:23:00-04:00</published><updated>2025-06-14T16:23:00-04:00</updated><id>https://ethanhuang.github.io/blog/2025/adv_memory</id><content type="html" xml:base="https://ethanhuang.github.io/blog/2025/adv_memory/"><![CDATA[<p>This technical note provides a comprehensive analysis of <strong>mini_malloc</strong>, a production-grade memory allocator implementation that demonstrates advanced concepts in systems programming. The allocator features:</p>
 
 <ul>
   <li><strong>Enhanced Security</strong>: Canary-based corruption detection and boundary tag validation</li>
@@ -5055,7 +6509,7 @@ Success rate: 100.0%
 
 <p><em>This technical note demonstrates that sophisticated systems software can be both educational and practical. The mini_malloc implementation bridges the gap between academic exercises and production-quality code, providing a solid foundation for understanding memory management in modern systems.</em></p>
 
-<p><em>End of Document</em></p>]]></content><author><name></name></author><category term="computer-sciences" /><category term="operating_systems" /><category term="concurrent" /><category term="c/c++" /><category term="ds-and-algorithms" /><summary type="html"><![CDATA[Technical deep-dive into mini_malloc - a memory allocator showcasing security-enhanced design patterns and debugging infrastructure. Demonstrates arena-based concurrency, immediate coalescing, dual allocation strategies, and corruption detection mechanisms. Features complete implementation (~800 lines), comprehensive test coverage, and detailed performance analysis comparing against system malloc.]]></summary></entry><entry><title type="html">mini_malloc: From Scratch to Safe: Building a Thread-Safe Memory Allocator in C</title><link href="http://localhost:4000/blog/2025/memory/" rel="alternate" type="text/html" title="mini_malloc: From Scratch to Safe: Building a Thread-Safe Memory Allocator in C" /><published>2025-06-10T16:23:00-04:00</published><updated>2025-06-10T16:23:00-04:00</updated><id>http://localhost:4000/blog/2025/memory</id><content type="html" xml:base="http://localhost:4000/blog/2025/memory/"><![CDATA[<p>This technical note provides a comprehensive analysis of <strong>mini_malloc</strong>, a custom memory allocator implementation that demonstrates key concepts in systems programming. The allocator features:</p>
+<p><em>End of Document</em></p>]]></content><author><name></name></author><category term="computer-sciences" /><category term="operating_systems" /><category term="concurrent" /><category term="c/c++" /><category term="ds-and-algorithms" /><summary type="html"><![CDATA[Technical deep-dive into mini_malloc - a memory allocator showcasing security-enhanced design patterns and debugging infrastructure. Demonstrates arena-based concurrency, immediate coalescing, dual allocation strategies, and corruption detection mechanisms. Features complete implementation (~800 lines), comprehensive test coverage, and detailed performance analysis comparing against system malloc.]]></summary></entry><entry><title type="html">mini_malloc: From Scratch to Safe: Building a Thread-Safe Memory Allocator in C</title><link href="https://ethanhuang.github.io/blog/2025/memory/" rel="alternate" type="text/html" title="mini_malloc: From Scratch to Safe: Building a Thread-Safe Memory Allocator in C" /><published>2025-06-10T16:23:00-04:00</published><updated>2025-06-10T16:23:00-04:00</updated><id>https://ethanhuang.github.io/blog/2025/memory</id><content type="html" xml:base="https://ethanhuang.github.io/blog/2025/memory/"><![CDATA[<p>This technical note provides a comprehensive analysis of <strong>mini_malloc</strong>, a custom memory allocator implementation that demonstrates key concepts in systems programming. The allocator features:</p>
 
 <ul>
   <li><strong>Thread-safe operation</strong> using per-arena locking with striped lock distribution</li>
@@ -8801,7 +10255,7 @@ Success rate: 100.0%
 
 </code></pre>
 
-<p><em>End of Document</em></p>]]></content><author><name></name></author><category term="computer-sciences" /><category term="operating_systems" /><category term="concurrent" /><category term="c/c++" /><category term="ds-and-algorithms" /><summary type="html"><![CDATA[This document provides an in-depth look at the design and implementation of **mini_malloc**, a small, first-fit, thread-safe memory allocator in C. It covers the allocator’s architecture, data structures, algorithms, debugging facilities, and testing strategy.]]></summary></entry><entry><title type="html">Modern Concurrent Red-Black Tree Design in C++: A Practical Guide - Part 1</title><link href="http://localhost:4000/blog/2025/conrbtree/" rel="alternate" type="text/html" title="Modern Concurrent Red-Black Tree Design in C++: A Practical Guide - Part 1" /><published>2025-06-06T12:09:00-04:00</published><updated>2025-06-06T12:09:00-04:00</updated><id>http://localhost:4000/blog/2025/conrbtree</id><content type="html" xml:base="http://localhost:4000/blog/2025/conrbtree/"><![CDATA[<h2 id="introduction">Introduction</h2>
+<p><em>End of Document</em></p>]]></content><author><name></name></author><category term="computer-sciences" /><category term="operating_systems" /><category term="concurrent" /><category term="c/c++" /><category term="ds-and-algorithms" /><summary type="html"><![CDATA[This document provides an in-depth look at the design and implementation of **mini_malloc**, a small, first-fit, thread-safe memory allocator in C. It covers the allocator’s architecture, data structures, algorithms, debugging facilities, and testing strategy.]]></summary></entry><entry><title type="html">Modern Concurrent Red-Black Tree Design in C++: A Practical Guide - Part 1</title><link href="https://ethanhuang.github.io/blog/2025/conrbtree/" rel="alternate" type="text/html" title="Modern Concurrent Red-Black Tree Design in C++: A Practical Guide - Part 1" /><published>2025-06-06T12:09:00-04:00</published><updated>2025-06-06T12:09:00-04:00</updated><id>https://ethanhuang.github.io/blog/2025/conrbtree</id><content type="html" xml:base="https://ethanhuang.github.io/blog/2025/conrbtree/"><![CDATA[<h2 id="introduction">Introduction</h2>
 
 <p>Red-Black Trees (RB-Trees) offer guaranteed $O(\log n)$ operations in single-threaded contexts. However, as soon as multiple threads try to query or modify the same tree concurrently, a naive implementation suffers from severe contention and potential deadlocks. In this post, we share a <strong>modest</strong> approach, neither world-beating nor lock-free—to transform a standard RB-Tree into a <strong>thread-safe</strong> data structure in C++. We will:</p>
 

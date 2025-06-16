@@ -30,7 +30,18 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/cv/";
           },
-        },{id: "post-mini-malloc-a-security-enhanced-memory-allocator-with-debugging-features",
+        },{id: "post-mini-malloc-a-basic-first-fit-memory-allocator",
+        
+          title: "mini_malloc: A Basic First-Fit Memory Allocator",
+        
+        description: "This document provides an in-depth look at the design and implementation of **mini_malloc**, a basic first-fit memory allocator in C. It covers the allocator&#39;s architecture, data structures, algorithms, and testing strategy for educational purposes.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/basic_memory/";
+          
+        },
+      },{id: "post-mini-malloc-a-security-enhanced-memory-allocator-with-debugging-features",
         
           title: "mini_malloc: A Security-Enhanced Memory Allocator with Debugging Features",
         
