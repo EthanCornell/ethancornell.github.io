@@ -30,18 +30,7 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/cv/";
           },
-        },{id: "post-level-1-mini-malloc-a-basic-first-fit-memory-allocator",
-        
-          title: "Level 1 mini_malloc: A Basic First-Fit Memory Allocator",
-        
-        description: "This document provides an in-depth look at the design and implementation of **mini_malloc**, a basic first-fit memory allocator in C. It covers the allocator&#39;s architecture, data structures, algorithms, and testing strategy for educational purposes.",
-        section: "Posts",
-        handler: () => {
-          
-            window.location.href = "/blog/2025/basic_memory/";
-          
-        },
-      },{id: "post-level-3-mini-malloc-a-security-enhanced-memory-allocator-with-debugging-features",
+        },{id: "post-level-3-mini-malloc-a-security-enhanced-memory-allocator-with-debugging-features",
         
           title: "Level 3 mini_malloc: A Security-Enhanced Memory Allocator with Debugging Features",
         
@@ -61,6 +50,17 @@ ninja.data = [{
         handler: () => {
           
             window.location.href = "/blog/2025/memory/";
+          
+        },
+      },{id: "post-level-1-mini-malloc-a-basic-first-fit-memory-allocator",
+        
+          title: "Level 1 mini_malloc: A Basic First-Fit Memory Allocator",
+        
+        description: "This document provides an in-depth look at the design and implementation of **mini_malloc**, a basic first-fit memory allocator in C. It covers the allocator&#39;s architecture, data structures, algorithms, and testing strategy for educational purposes.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/basic_memory/";
           
         },
       },{id: "post-modern-concurrent-red-black-tree-design-in-c-a-practical-guide-part-1",
