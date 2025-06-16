@@ -30,7 +30,18 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/cv/";
           },
-        },{id: "post-mini-malloc-from-scratch-to-safe-building-a-thread-safe-memory-allocator-in-c",
+        },{id: "post-mini-malloc-a-security-enhanced-memory-allocator-with-debugging-features",
+        
+          title: "mini_malloc: A Security-Enhanced Memory Allocator with Debugging Features",
+        
+        description: "Technical deep-dive into mini_malloc - a memory allocator showcasing security-enhanced design patterns and debugging infrastructure. Demonstrates arena-based concurrency, immediate coalescing, dual allocation strategies, and corruption detection mechanisms. Features complete implementation (~800 lines), comprehensive test coverage, and detailed performance analysis comparing against system malloc.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/adv_memory/";
+          
+        },
+      },{id: "post-mini-malloc-from-scratch-to-safe-building-a-thread-safe-memory-allocator-in-c",
         
           title: "mini_malloc: From Scratch to Safe: Building a Thread-Safe Memory Allocator in C",
         
