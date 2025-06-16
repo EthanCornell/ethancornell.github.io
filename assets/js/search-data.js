@@ -30,9 +30,9 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/cv/";
           },
-        },{id: "post-mini-malloc-a-basic-first-fit-memory-allocator",
+        },{id: "post-level-1-mini-malloc-a-basic-first-fit-memory-allocator",
         
-          title: "mini_malloc: A Basic First-Fit Memory Allocator",
+          title: "Level 1 mini_malloc: A Basic First-Fit Memory Allocator",
         
         description: "This document provides an in-depth look at the design and implementation of **mini_malloc**, a basic first-fit memory allocator in C. It covers the allocator&#39;s architecture, data structures, algorithms, and testing strategy for educational purposes.",
         section: "Posts",
@@ -41,9 +41,9 @@ ninja.data = [{
             window.location.href = "/blog/2025/basic_memory/";
           
         },
-      },{id: "post-mini-malloc-a-security-enhanced-memory-allocator-with-debugging-features",
+      },{id: "post-level-3-mini-malloc-a-security-enhanced-memory-allocator-with-debugging-features",
         
-          title: "mini_malloc: A Security-Enhanced Memory Allocator with Debugging Features",
+          title: "Level 3 mini_malloc: A Security-Enhanced Memory Allocator with Debugging Features",
         
         description: "Technical deep-dive into mini_malloc - a memory allocator showcasing security-enhanced design patterns and debugging infrastructure. Demonstrates arena-based concurrency, immediate coalescing, dual allocation strategies, and corruption detection mechanisms. Features complete implementation (~800 lines), comprehensive test coverage, and detailed performance analysis comparing against system malloc.",
         section: "Posts",
@@ -52,9 +52,9 @@ ninja.data = [{
             window.location.href = "/blog/2025/adv_memory/";
           
         },
-      },{id: "post-mini-malloc-from-scratch-to-safe-building-a-thread-safe-memory-allocator-in-c",
+      },{id: "post-level-2-mini-malloc-from-scratch-to-safe-building-a-thread-safe-memory-allocator-in-c",
         
-          title: "mini_malloc: From Scratch to Safe: Building a Thread-Safe Memory Allocator in C",
+          title: "Level 2 mini_malloc: From Scratch to Safe: Building a Thread-Safe Memory Allocator in...",
         
         description: "This document provides an in-depth look at the design and implementation of **mini_malloc**, a small, first-fit, thread-safe memory allocator in C. It covers the allocator’s architecture, data structures, algorithms, debugging facilities, and testing strategy.",
         section: "Posts",

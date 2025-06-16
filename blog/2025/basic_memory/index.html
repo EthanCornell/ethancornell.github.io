@@ -17,7 +17,7 @@
   
   
     
-      mini_malloc: A Basic First-Fit Memory Allocator | Ethan Huang
+      Level 1 mini_malloc: A Basic First-Fit Memory Allocator | Ethan Huang
     
   
 </title>
@@ -246,7 +246,7 @@
 
 <div class="post">
   <header class="post-header">
-    <h1 class="post-title">mini_malloc: A Basic First-Fit Memory Allocator</h1>
+    <h1 class="post-title">Level 1 mini_malloc: A Basic First-Fit Memory Allocator</h1>
     <p class="post-meta">
       Created on June 16, 2025
       
@@ -1145,6 +1145,45 @@ After splitting:
 
 <hr>
 
+<h2 id="references-and-further-reading">References and Further Reading</h2>
+
+<ol>
+  <li>
+<strong>Classic Papers</strong>
+    <ul>
+      <li>“Dynamic Storage Allocation: A Survey and Critical Review” - Wilson et al.</li>
+      <li>“The Memory Fragmentation Problem: Solved?” - Johnstone &amp; Wilson</li>
+      <li>“Hoard: A Scalable Memory Allocator” - Berger et al.</li>
+    </ul>
+  </li>
+  <li>
+<strong>Implementation References</strong>
+    <ul>
+      <li>Doug Lea’s malloc (dlmalloc)</li>
+      <li>GNU libc malloc (ptmalloc2)</li>
+      <li>jemalloc technical documentation</li>
+      <li>tcmalloc design document</li>
+    </ul>
+  </li>
+  <li>
+<strong>Books</strong>
+    <ul>
+      <li>“The Art of Computer Programming, Vol. 1” - Knuth (Section 2.5)</li>
+      <li>“Advanced Programming in the UNIX Environment” - Stevens</li>
+      <li>“Computer Systems: A Programmer’s Perspective” - Bryant &amp; O’Hallaron</li>
+    </ul>
+  </li>
+  <li>
+<strong>Online Resources</strong>
+    <ul>
+      <li>Memory Management Reference (www.memorymanagement.org)</li>
+      <li>Malloc Tutorial (danluu.com)</li>
+      <li>Allocator Benchmarks (github.com/emeryberger/)</li>
+    </ul>
+  </li>
+</ol>
+
+<hr>
 <h2 id="appendix-complete-implementation">Appendix: Complete Implementation</h2>
 
 <h3 id="mini_malloch">mini_malloc.h</h3>
@@ -1790,50 +1829,7 @@ Total free memory: 296 bytes
 </code></pre>
 
 <hr>
-
-<h2 id="references-and-further-reading">References and Further Reading</h2>
-
-<ol>
-  <li>
-<strong>Classic Papers</strong>
-    <ul>
-      <li>“Dynamic Storage Allocation: A Survey and Critical Review” - Wilson et al.</li>
-      <li>“The Memory Fragmentation Problem: Solved?” - Johnstone &amp; Wilson</li>
-      <li>“Hoard: A Scalable Memory Allocator” - Berger et al.</li>
-    </ul>
-  </li>
-  <li>
-<strong>Implementation References</strong>
-    <ul>
-      <li>Doug Lea’s malloc (dlmalloc)</li>
-      <li>GNU libc malloc (ptmalloc2)</li>
-      <li>jemalloc technical documentation</li>
-      <li>tcmalloc design document</li>
-    </ul>
-  </li>
-  <li>
-<strong>Books</strong>
-    <ul>
-      <li>“The Art of Computer Programming, Vol. 1” - Knuth (Section 2.5)</li>
-      <li>“Advanced Programming in the UNIX Environment” - Stevens</li>
-      <li>“Computer Systems: A Programmer’s Perspective” - Bryant &amp; O’Hallaron</li>
-    </ul>
-  </li>
-  <li>
-<strong>Online Resources</strong>
-    <ul>
-      <li>Memory Management Reference (www.memorymanagement.org)</li>
-      <li>Malloc Tutorial (danluu.com)</li>
-      <li>Allocator Benchmarks (github.com/emeryberger/)</li>
-    </ul>
-  </li>
-</ol>
-
-<hr>
-
 <p><em>This completes the technical documentation for mini_malloc, a basic but educational memory allocator implementation.</em></p>
-
-<p><em>End of Document</em></p>
 
     </div>
   </article>
@@ -1860,7 +1856,7 @@ Total free memory: 296 bytes
 
   <li class="my-2">
     
-      <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/adv_memory/">mini_malloc: A Security-Enhanced Memory Allocator with Debugging Features</a>
+      <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/adv_memory/">Level 3 mini_malloc: A Security-Enhanced Memory Allocator with Debugging Features</a>
     
   </li>
 
@@ -1868,7 +1864,7 @@ Total free memory: 296 bytes
 
   <li class="my-2">
     
-      <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/memory/">mini_malloc: From Scratch to Safe: Building a Thread-Safe Memory Allocator in C</a>
+      <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/memory/">Level 2 mini_malloc: From Scratch to Safe: Building a Thread-Safe Memory Allocator in C</a>
     
   </li>
 
