@@ -30,7 +30,18 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/cv/";
           },
-        },{id: "post-level-3-mini-malloc-a-security-enhanced-memory-allocator-with-debugging-features",
+        },{id: "post-from-245s-to-0-37s-optimizing-an-mpi-traveling-salesman-solver",
+        
+          title: "From 245s to 0.37s: Optimizing an MPI Traveling Salesman Solver",
+        
+        description: "A comprehensive technical journey through four iterations of MPI-based TSP solver optimization, achieving a 670× performance improvement through algorithmic enhancements, hybrid parallelization, and careful engineering.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/TSPMP/";
+          
+        },
+      },{id: "post-level-3-mini-malloc-a-security-enhanced-memory-allocator-with-debugging-features",
         
           title: "Level 3 mini_malloc: A Security-Enhanced Memory Allocator with Debugging Features",
         
@@ -56,7 +67,7 @@ ninja.data = [{
         
           title: "Level 1 mini_malloc: A Basic First-Fit Memory Allocator",
         
-        description: "This document provides an in-depth look at the design and implementation of **mini_malloc**, a basic first-fit memory allocator in C. It covers the allocator&#39;s architecture, data structures, algorithms, and testing strategy for educational purposes.",
+        description: "",
         section: "Posts",
         handler: () => {
           
