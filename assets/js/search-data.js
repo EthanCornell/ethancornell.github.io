@@ -34,7 +34,7 @@ ninja.data = [{
         
           title: "From 245s to 0.37s: Optimizing an MPI Traveling Salesman Solver",
         
-        description: "A comprehensive technical journey through four iterations of MPI-based TSP solver optimization, achieving a 670× performance improvement through algorithmic enhancements, hybrid parallelization, and careful engineering.",
+        description: "A comprehensive technical journey through four iterations of MPI-based TSP solver optimization, achieving a 635× performance improvement through algorithmic enhancements, hybrid parallelization, and careful engineering.",
         section: "Posts",
         handler: () => {
           

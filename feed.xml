@@ -1,7 +1,7 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://ethanhuang.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://ethanhuang.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2025-06-19T08:07:18-04:00</updated><id>https://ethanhuang.github.io/feed.xml</id><title type="html">blank</title><subtitle>A simple, whitespace theme for academics. Based on [*folio](https://github.com/bogoli/-folio) design.
-</subtitle><entry><title type="html">From 245s to 0.37s: Optimizing an MPI Traveling Salesman Solver</title><link href="https://ethanhuang.github.io/blog/2025/TSPMP/" rel="alternate" type="text/html" title="From 245s to 0.37s: Optimizing an MPI Traveling Salesman Solver" /><published>2025-06-18T20:12:43-04:00</published><updated>2025-06-18T20:12:43-04:00</updated><id>https://ethanhuang.github.io/blog/2025/TSPMP</id><content type="html" xml:base="https://ethanhuang.github.io/blog/2025/TSPMP/"><![CDATA[<p>This technical note documents the complete development journey of a high-performance MPI-based Traveling Salesman Problem (TSP) solver, progressing through four major iterations that achieved a remarkable <strong>670× speedup</strong> improvement. The project demonstrates the iterative optimization process from a basic working implementation to a production-quality hybrid MPI+OpenMP solver.</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en"><generator uri="https://jekyllrb.com/" version="4.4.1">Jekyll</generator><link href="https://ethanhuang.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://ethanhuang.github.io/" rel="alternate" type="text/html" hreflang="en" /><updated>2025-06-19T09:08:51-04:00</updated><id>https://ethanhuang.github.io/feed.xml</id><title type="html">blank</title><subtitle>A simple, whitespace theme for academics. Based on [*folio](https://github.com/bogoli/-folio) design.
+</subtitle><entry><title type="html">From 245s to 0.37s: Optimizing an MPI Traveling Salesman Solver</title><link href="https://ethanhuang.github.io/blog/2025/TSPMP/" rel="alternate" type="text/html" title="From 245s to 0.37s: Optimizing an MPI Traveling Salesman Solver" /><published>2025-06-18T20:12:43-04:00</published><updated>2025-06-18T20:12:43-04:00</updated><id>https://ethanhuang.github.io/blog/2025/TSPMP</id><content type="html" xml:base="https://ethanhuang.github.io/blog/2025/TSPMP/"><![CDATA[<p>This technical note documents the complete development journey of a high-performance MPI-based Traveling Salesman Problem (TSP) solver, progressing through four major iterations that achieved a remarkable <strong>635× speedup</strong> improvement. The project demonstrates the iterative optimization process from a basic working implementation to a production-quality hybrid MPI+OpenMP solver.</p>
 
-<p><strong>Key Achievement</strong>: Single-rank performance on 18-city problems improved from 245.9s (v1) to 0.37s (v4) — a 670× speedup that transforms an impractical algorithm into a highly efficient one.</p>
+<p><strong>Key Achievement</strong>: Single-rank performance on 18-city problems improved from 245.9s (v1) to 0.37s (v4) — a 635× speedup that transforms an impractical algorithm into a highly efficient one.</p>
 
 <hr />
 
@@ -52,7 +52,7 @@
 <p><strong>Achieved Outcomes:</strong></p>
 <ul>
   <li>4 progressively optimized solver versions</li>
-  <li>670× single-rank performance improvement</li>
+  <li>635× single-rank performance improvement</li>
   <li>Hybrid MPI+OpenMP parallelization</li>
   <li>Production-quality optimization techniques</li>
 </ul>
@@ -221,7 +221,7 @@ python3 submitjob.py <span class="nt">-p</span> 24 <span class="nt">-a</span> <s
 <ul>
   <li><strong>dist17 (17 cities)</strong>: v1 ~73s, v4 ~0.3s (single rank)</li>
   <li><strong>dist18 (18 cities)</strong>: v1 ~246s, v4 ~0.4s (single rank)</li>
-  <li><strong>dist19 (19 cities)</strong>: v4 ~5.5s (8 ranks recommended)</li>
+  <li><strong>dist19 (19 cities)</strong>: v4 ~0.901s (1 ranks recommended, cause 1‐rank run only creates 16 threads)</li>
 </ul>
 
 <p><strong>When to Use Each Version:</strong></p>
@@ -240,7 +240,7 @@ python3 submitjob.py <span class="nt">-p</span> 24 <span class="nt">-a</span> <s
 
 Basic master-worker   Owner-computes         Advanced pruning     MPI+OpenMP hybrid
 First-fit allocation  All ranks participate  2-edge bounds        Production-ready
-~245s (dist18)       ~119s (50% faster)     ~4.3s (56× faster)   ~0.37s (670× faster)
+~245s (dist18)       ~119s (50% faster)     ~4.3s (56× faster)   ~0.37s (635× faster)
 </code></pre></div></div>
 
 <p><strong>Key Insight</strong>: Each version addressed fundamental limitations of the previous one, with v3→v4 representing the most dramatic algorithmic breakthrough.</p>
@@ -1862,8 +1862,8 @@ Hardware Efficiency:
 Runtime Performance:
 ├── dist17: 1.36s → 0.30s (4.5× improvement)
 ├── dist18: 4.33s → 0.39s (11× improvement)  
-├── dist19: 24.1s → 5.5s (4.4× improvement)
-└── Overall: 634× improvement vs. V1 baseline
+├── dist19: 24.1s → 0.901s (26.7× improvement)
+└── Overall: 635× improvement vs. V1 baseline (dist18 benchmark)
 </code></pre></div></div>
 
 <p>The V3 → V4 evolution demonstrates how systematic analysis of resource utilization can drive architectural innovations that fully exploit modern computing hardware while preserving all previous algorithmic achievements. The hybrid approach represents the optimal marriage of distributed and shared memory parallelization strategies.</p>
@@ -1971,7 +1971,7 @@ Runtime Performance:
       <td><strong>v4</strong></td>
       <td>0.36s</td>
       <td>0.37s</td>
-      <td><strong>670×</strong></td>
+      <td><strong>635×</strong></td>
     </tr>
   </tbody>
 </table>
@@ -2446,7 +2446,7 @@ Rank 3: ████████████████████████
       <td><strong>Performance</strong></td>
       <td>Acceptable</td>
       <td>Exceptional</td>
-      <td>670× faster</td>
+      <td>635× faster</td>
     </tr>
     <tr>
       <td><strong>Scalability</strong></td>
@@ -2619,7 +2619,7 @@ Your testing revealed that <strong>more parallelism isn’t always better</stron
   <li>Created reusable tools and benchmarks for future work</li>
 </ul>
 
-<p><strong>Final Reflection</strong>: The journey from v1 to v4 proves that extraordinary performance is achievable through systematic application of computer science principles, careful engineering, and persistent optimization. The 670× speedup transformation an impractical algorithm into a highly efficient solution—demonstrating the profound impact that thoughtful optimization can have on real computational problems.</p>
+<p><strong>Final Reflection</strong>: The journey from v1 to v4 proves that extraordinary performance is achievable through systematic application of computer science principles, careful engineering, and persistent optimization. The 635× speedup transformation an impractical algorithm into a highly efficient solution—demonstrating the profound impact that thoughtful optimization can have on real computational problems.</p>
 
 <hr />
 
@@ -3046,7 +3046,7 @@ Your testing revealed that <strong>more parallelism isn’t always better</stron
 <h3 id="wsp-mpi_v2c">wsp-mpi_v2.c</h3>
 
 <div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/*--------------------------------------------------------------------*
- *  HIGH-PERFORMANCE Message-Passing WSP - Way2
+ *  HIGH-PERFORMANCE Message-Passing WSP
  *
  *  Key optimizations:
  *  1. Owner-computes seeding (eliminates master bottleneck)
@@ -3494,7 +3494,6 @@ Your testing revealed that <strong>more parallelism isn’t always better</stron
     <span class="n">MPI_Type_commit</span><span class="p">(</span><span class="o">&amp;</span><span class="n">TASK_TYPE</span><span class="p">);</span>
 <span class="p">}</span>
 
-<span class="cm">/* Work-stealing removed for simplicity */</span>
 
 <span class="cm">/* Simplified DFS without complex OpenMP for now */</span>
 <span class="k">static</span> <span class="kt">void</span> <span class="nf">enhanced_dfs_worker</span><span class="p">(</span><span class="k">const</span> <span class="n">Task</span> <span class="o">*</span><span class="n">initial_tasks</span><span class="p">,</span> <span class="kt">int</span> <span class="n">num_tasks</span><span class="p">)</span>
@@ -4213,7 +4212,7 @@ Comparison complete!
 
 </code></pre>
 <hr />
-<p><em>This technical note documents a comprehensive journey from basic implementation to production-quality optimization, demonstrating that systematic engineering can achieve extraordinary performance improvements. Complete source code and reproduction instructions available in the linked repository.</em></p>]]></content><author><name></name></author><category term="computer-sciences" /><category term="operating_systems" /><category term="parallel" /><category term="c/c++" /><category term="ds-and-algorithms" /><summary type="html"><![CDATA[A comprehensive technical journey through four iterations of MPI-based TSP solver optimization, achieving a 670× performance improvement through algorithmic enhancements, hybrid parallelization, and careful engineering.]]></summary></entry><entry><title type="html">Level 3 mini_malloc: A Security-Enhanced Memory Allocator with Debugging Features</title><link href="https://ethanhuang.github.io/blog/2025/adv_memory/" rel="alternate" type="text/html" title="Level 3 mini_malloc: A Security-Enhanced Memory Allocator with Debugging Features" /><published>2025-06-16T08:12:12-04:00</published><updated>2025-06-16T08:12:12-04:00</updated><id>https://ethanhuang.github.io/blog/2025/adv_memory</id><content type="html" xml:base="https://ethanhuang.github.io/blog/2025/adv_memory/"><![CDATA[<p>This technical note provides a comprehensive analysis of <strong>mini_malloc</strong>, a production-grade memory allocator implementation that demonstrates advanced concepts in systems programming. The allocator features:</p>
+<p><em>This technical note documents a comprehensive journey from basic implementation to production-quality optimization, demonstrating that systematic engineering can achieve extraordinary performance improvements. Complete source code and reproduction instructions available in the linked repository.</em></p>]]></content><author><name></name></author><category term="computer-sciences" /><category term="operating_systems" /><category term="parallel" /><category term="c/c++" /><category term="ds-and-algorithms" /><summary type="html"><![CDATA[A comprehensive technical journey through four iterations of MPI-based TSP solver optimization, achieving a 635× performance improvement through algorithmic enhancements, hybrid parallelization, and careful engineering.]]></summary></entry><entry><title type="html">Level 3 mini_malloc: A Security-Enhanced Memory Allocator with Debugging Features</title><link href="https://ethanhuang.github.io/blog/2025/adv_memory/" rel="alternate" type="text/html" title="Level 3 mini_malloc: A Security-Enhanced Memory Allocator with Debugging Features" /><published>2025-06-16T08:12:12-04:00</published><updated>2025-06-16T08:12:12-04:00</updated><id>https://ethanhuang.github.io/blog/2025/adv_memory</id><content type="html" xml:base="https://ethanhuang.github.io/blog/2025/adv_memory/"><![CDATA[<p>This technical note provides a comprehensive analysis of <strong>mini_malloc</strong>, a production-grade memory allocator implementation that demonstrates advanced concepts in systems programming. The allocator features:</p>
 
 <ul>
   <li><strong>Enhanced Security</strong>: Canary-based corruption detection and boundary tag validation</li>
