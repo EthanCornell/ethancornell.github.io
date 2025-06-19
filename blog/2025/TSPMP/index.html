@@ -378,6 +378,184 @@
 
 <hr>
 
+<h3 id="how-to-run-the-solvers">How to Run the Solvers</h3>
+
+<h4 id="quick-start-guide">Quick Start Guide</h4>
+
+<p><strong>Prerequisites:</strong></p>
+<ul>
+  <li>MPI implementation (OpenMPI recommended)</li>
+  <li>GCC compiler with OpenMP support</li>
+  <li>Git for repository access</li>
+</ul>
+
+<p><strong>Download and Build:</strong></p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git clone https://github.com/EthanCornell/MPI-Wandering-Salesman-Solver
+<span class="nb">cd </span>MPI-Wandering-Salesman-Solver
+make all  <span class="c"># Builds all 4 versions</span>
+</code></pre></div></div>
+
+<h4 id="basic-usage-examples">Basic Usage Examples</h4>
+
+<p><strong>Single Version Testing:</strong></p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Test v1 (baseline) on 17-city problem</span>
+./wsp-mpi input/dist17
+
+<span class="c"># Test v4 (hybrid) on 18-city problem  </span>
+./wsp-mpi_v4 input/dist18
+</code></pre></div></div>
+
+<p><strong>Multi-Rank Execution:</strong></p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Run v4 with 8 MPI ranks</span>
+mpirun <span class="nt">-np</span> 8 ./wsp-mpi_v4 input/dist18
+
+<span class="c"># Run with oversubscription (more ranks than cores)</span>
+mpirun <span class="nt">--oversubscribe</span> <span class="nt">-np</span> 12 ./wsp-mpi_v4 input/dist19
+</code></pre></div></div>
+
+<p><strong>Performance Comparison:</strong></p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Compare all versions automatically</span>
+./compare_versions.sh input/dist17 4  <span class="c"># 4 ranks</span>
+./compare_versions.sh input/dist18 8  <span class="c"># 8 ranks</span>
+</code></pre></div></div>
+
+<h4 id="recommended-configurations">Recommended Configurations</h4>
+
+<p><strong>For Learning/Teaching:</strong></p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Start with small problems to understand behavior</span>
+./wsp-mpi input/dist10        <span class="c"># v1: Basic implementation</span>
+./wsp-mpi_v2 input/dist10     <span class="c"># v2: Distributed approach  </span>
+./wsp-mpi_v3 input/dist10     <span class="c"># v3: Advanced algorithms</span>
+./wsp-mpi_v4 input/dist10     <span class="c"># v4: Hybrid parallelization</span>
+</code></pre></div></div>
+
+<p><strong>For Performance Analysis:</strong></p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Single-rank performance comparison</span>
+./wsp-mpi input/dist17        <span class="c"># Baseline (slow)</span>
+./wsp-mpi_v4 input/dist17     <span class="c"># Optimized (fast)</span>
+
+<span class="c"># Multi-rank scaling study</span>
+<span class="k">for </span>ranks <span class="k">in </span>1 2 4 8<span class="p">;</span> <span class="k">do
+  </span><span class="nb">echo</span> <span class="s2">"Testing </span><span class="nv">$ranks</span><span class="s2"> ranks:"</span>
+  mpirun <span class="nt">-np</span> <span class="nv">$ranks</span> ./wsp-mpi_v4 input/dist18
+<span class="k">done</span>
+</code></pre></div></div>
+
+<p><strong>For Production Use:</strong></p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Optimal configurations based on problem size</span>
+
+<span class="c"># Small problems (≤18 cities): Single rank optimal</span>
+./wsp-mpi_v4 input/dist17
+
+<span class="c"># Medium problems (19 cities): Multi-rank beneficial  </span>
+mpirun <span class="nt">-np</span> 8 ./wsp-mpi_v4 input/dist19
+
+<span class="c"># Large problems: Scale ranks with problem size</span>
+mpirun <span class="nt">--oversubscribe</span> <span class="nt">-np</span> 16 ./wsp-mpi_v4 input/dist20
+</code></pre></div></div>
+
+<h4 id="understanding-output">Understanding Output</h4>
+
+<p><strong>Typical Output Format:</strong></p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Stable hybrid search: 8 ranks, 2-3 tasks per rank, 16 OpenMP threads per rank
+Optimal tour cost: 317   time: 1.846 s   ranks: 8
+Optimal path: 0 9 16 6 11 1 15 2 7 4 12 10 5 8 17 14 13 3 0
+</code></pre></div></div>
+
+<p><strong>Output Explanation:</strong></p>
+<ul>
+  <li>
+<strong>Search description</strong>: Shows version type and parallelization configuration</li>
+  <li>
+<strong>Optimal tour cost</strong>: Minimum total distance found (lower is better)</li>
+  <li>
+<strong>Time</strong>: Wall-clock execution time in seconds</li>
+  <li>
+<strong>Ranks</strong>: Number of MPI processes used</li>
+  <li>
+<strong>Optimal path</strong>: Sequence of cities in optimal tour (starts and ends at city 0)</li>
+</ul>
+
+<h4 id="troubleshooting-common-issues">Troubleshooting Common Issues</h4>
+
+<p><strong>Performance Issues:</strong></p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># If single-rank faster than multi-rank (expected for small problems):</span>
+./wsp-mpi_v4 input/dist18           <span class="c"># Try single rank first</span>
+mpirun <span class="nt">-np</span> 2 ./wsp-mpi_v4 input/dist18   <span class="c"># Then compare with 2 ranks</span>
+
+<span class="c"># If running out of memory:</span>
+<span class="nb">export </span><span class="nv">OMP_NUM_THREADS</span><span class="o">=</span>4            <span class="c"># Reduce OpenMP threads</span>
+mpirun <span class="nt">-np</span> 4 ./wsp-mpi_v4 input/dist18
+</code></pre></div></div>
+
+<p><strong>Compilation Issues:</strong></p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># If OpenMP not available:</span>
+make wsp-mpi_v3    <span class="c"># Use v3 (MPI-only advanced version)</span>
+
+<span class="c"># If MPI not found:</span>
+module load openmpi    <span class="c"># On cluster systems</span>
+<span class="c"># or</span>
+<span class="nb">export </span><span class="nv">PATH</span><span class="o">=</span>/usr/local/bin:<span class="nv">$PATH</span>    <span class="c"># Add MPI to path</span>
+</code></pre></div></div>
+
+<p><strong>Input File Issues:</strong></p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Verify input format:</span>
+<span class="nb">head </span>input/dist17    <span class="c"># Should show: "17" followed by distance matrix</span>
+
+<span class="c"># Test with known working input:</span>
+./wsp-mpi_v4 input/dist10    <span class="c"># Small, fast test case</span>
+</code></pre></div></div>
+
+<h4 id="advanced-usage">Advanced Usage</h4>
+
+<p><strong>Custom Problem Sizes:</strong></p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Generate custom distance matrix (if distgen available):</span>
+<span class="nb">echo</span> <span class="s2">"12 0 custom_dist12"</span> | ./input/distgen
+./wsp-mpi_v4 custom_dist12
+</code></pre></div></div>
+
+<p><strong>Cluster Deployment:</strong></p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Using provided cluster scripts:</span>
+./run_job.sh 2 12 output.log input/dist18 wsp-mpi_v4
+
+<span class="c"># Or with submitjob.py:</span>
+python3 submitjob.py <span class="nt">-p</span> 24 <span class="nt">-a</span> <span class="s2">"input/dist18"</span>
+</code></pre></div></div>
+
+<p><strong>Detailed Benchmarking:</strong></p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Systematic performance analysis:</span>
+<span class="k">for </span>problem <span class="k">in </span>dist16 dist17 dist18<span class="p">;</span> <span class="k">do
+  </span><span class="nb">echo</span> <span class="s2">"Testing </span><span class="nv">$problem</span><span class="s2">:"</span>
+  ./compare_versions.sh input/<span class="nv">$problem</span> 8
+<span class="k">done</span>
+</code></pre></div></div>
+
+<h4 id="expected-performance">Expected Performance</h4>
+
+<p><strong>Typical Runtime Expectations:</strong></p>
+<ul>
+  <li>
+<strong>dist17 (17 cities)</strong>: v1 ~73s, v4 ~0.3s (single rank)</li>
+  <li>
+<strong>dist18 (18 cities)</strong>: v1 ~246s, v4 ~0.4s (single rank)</li>
+  <li>
+<strong>dist19 (19 cities)</strong>: v4 ~5.5s (8 ranks recommended)</li>
+</ul>
+
+<p><strong>When to Use Each Version:</strong></p>
+<ul>
+  <li>
+<strong>v1</strong>: Educational reference, understanding basic MPI</li>
+  <li>
+<strong>v2</strong>: Learning distributed computing principles</li>
+  <li>
+<strong>v3</strong>: Studying advanced TSP algorithms</li>
+  <li>
+<strong>v4</strong>: Production use, best performance</li>
+</ul>
+
+<hr>
+
 <h2 id="2-development-timeline">2. Development Timeline</h2>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>v1 (Baseline)    →    v2 (Distributed)    →    v3 (Enhanced)    →    v4 (Hybrid)
