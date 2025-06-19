@@ -3,7 +3,7 @@ layout: post
 title: "Level 3 mini_malloc: A Security-Enhanced Memory Allocator with Debugging Features"
 date: 2025-06-16 12:12:12
 description: Technical deep-dive into mini_malloc - a memory allocator showcasing security-enhanced design patterns and debugging infrastructure. Demonstrates arena-based concurrency, immediate coalescing, dual allocation strategies, and corruption detection mechanisms. Features complete implementation (~800 lines), comprehensive test coverage, and detailed performance analysis comparing against system malloc.
-tags: concurrent c/c++ ds-and-algorithms
+tags: c/c++ ds-and-algorithms
 categories: computer-sciences operating_systems
 featured: true
 giscus_comments: false
@@ -20,6 +20,10 @@ This technical note provides a comprehensive analysis of **mini_malloc**, a prod
 - **Comprehensive test suite** with 24 test cases covering functionality, stress, and concurrency
 
 The implementation balances production-quality features (about 1000 lines) with educational clarity, making it suitable for embedded systems, research platforms, and as a foundation for specialized allocators.
+
+
+> 🔗 **Source Code**: The complete implementation is available at [mini-malloc@github](https://github.com/EthanCornell/mini_malloc)
+
 
 ---
 
