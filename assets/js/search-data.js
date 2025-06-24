@@ -30,7 +30,18 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/cv/";
           },
-        },{id: "post-from-245s-to-0-37s-optimizing-an-mpi-traveling-salesman-solver",
+        },{id: "post-lock-free-queues-with-advanced-memory-reclamation-a-deep-dive-into-epoch-based-reclamation-and-hazard-pointers",
+        
+          title: "Lock-Free Queues with Advanced Memory Reclamation: A Deep Dive into Epoch-Based Reclamation and...",
+        
+        description: "Understanding how modern concurrent systems solve the memory reclamation problem in lock-free data structures",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/LFQ_EBR/";
+          
+        },
+      },{id: "post-from-245s-to-0-37s-optimizing-an-mpi-traveling-salesman-solver",
         
           title: "From 245s to 0.37s: Optimizing an MPI Traveling Salesman Solver",
         
