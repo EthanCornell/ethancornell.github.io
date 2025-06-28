@@ -30,7 +30,18 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/cv/";
           },
-        },{id: "post-lock-free-queues-with-advanced-memory-reclamation-a-deep-dive-into-epoch-based-reclamation-and-hazard-pointers",
+        },{id: "post-from-0-37x-to-18-7x-building-a-high-performance-simd-library-with-avx-512-speedups-in-data-science-inference-amp-hpc-workloads",
+        
+          title: "From 0.37x to 18.7x: Building a High-Performance SIMD Library with AVX-512 Speedups in...",
+        
+        description: "A comprehensive technical journey through building a high-performance SIMD library, achieving extraordinary speedups through masked operations, multiple data types, and advanced CPU feature detection.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/SIMD/";
+          
+        },
+      },{id: "post-lock-free-queues-with-advanced-memory-reclamation-a-deep-dive-into-epoch-based-reclamation-and-hazard-pointers",
         
           title: "Lock-Free Queues with Advanced Memory Reclamation: A Deep Dive into Epoch-Based Reclamation and...",
         
