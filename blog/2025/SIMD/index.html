@@ -295,7 +295,7 @@
   <article class="post-content">
     
     <div id="markdown-content">
-      <p>This technical note documents the complete development of a production-quality SIMD (Single Instruction, Multiple Data) library that leverages modern CPU capabilities to achieve extraordinary performance improvements. The project demonstrates advanced techniques including AVX-512 masked operations, multi-precision arithmetic, and sophisticated CPU feature detection.</p>
+      <p>This technical note outlines the development of a  SIMD (Single Instruction, Multiple Data) library that leverages modern CPU features to achieve notable  performance improvements. It covers techniques such as AVX-512 masked operations, multi-precision arithmetic, and runtime CPU feature detection.</p>
 
 <p><strong>Key Achievement</strong>: F32 dot product performance improved from 0.37x (slower than scalar) to 18.7x speedup through systematic SIMD optimization, transforming unusable performance into production-ready acceleration.</p>
 
@@ -319,7 +319,7 @@
   <li>
 <a href="#">Appendix A: Comprehensive Test Suite &amp; Complete Implementation</a>
     <ul>
-      <li>13.1 <a href="#simdhpp">simd.hpp</a>
+      <li>13.1 <a href="#simd_v3hpp">simd_v3.hpp</a>
 </li>
       <li>13.2 <a href="#benchmark_main_v3cpp">benchmark_main_v3.cpp</a>
 </li>
@@ -1563,21 +1563,23 @@ Well-designed abstractions (template specialization, runtime dispatch) enable bo
 
 <h2 id="source-code-and-reproduction">Source Code and Reproduction</h2>
 
-<h3 id="repository-structure">Repository Structure</h3>
+<h3 id="repository-structure--work-in-progress">Repository Structure (🚧 Work in Progress)</h3>
 
 <p>The complete implementation is available with comprehensive documentation:</p>
 
 <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>simd-library/
 ├── include/
-│   └── simd_v3.hpp           # Main library header
-├── src/
-│   ├── cpu_features.cpp      # Feature detection
-│   ├── avx512_impl.cpp       # AVX-512 implementations
-│   └── fallback_impl.cpp     # Scalar fallbacks
+│   ├── simd_v1.hpp           # Frist version  
+│   ├── simd_v2.hpp           # Second version
+│   └── simd_v3.hpp           # Main library header, 
+│                               including Scalar fallbacks, 
+│                               Feature detection, and AVX-512 
+│                               implementations
 ├── benchmarks/
-│   ├── benchmark_main_v3.cpp # Comprehensive benchmarks
-│   ├── accuracy_tests.cpp    # Validation suite
-│   └── performance_analysis/ # Analysis tools
+│   ├── benchmark_main_v3.cpp # Comprehensive benchmarks, 
+│   │                           including Validation suite, and 
+│   │                           Analysis tools
+│   └── benchmark_main_v2.cpp # Comprehensive benchmarks Version 2 
 ├── tests/
 │   ├── unit_tests.cpp        # Core functionality tests
 │   ├── edge_cases.cpp        # Boundary condition tests
@@ -1790,7 +1792,7 @@ Size    Time(ms)  Mops/s    Speedup   Notes
   <p>🔗 <strong><a href="https://github.com/EthanCornell/UltraSIMD" rel="external nofollow noopener" target="_blank"> UltraSIMD Repository</a></strong></p>
 </blockquote>
 
-<h3 id="simdhpp">simd.hpp</h3>
+<h3 id="simd_v3hpp">simd_v3.hpp</h3>
 
 <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
 <span class="c1">//==============================================================================</span>
@@ -4839,9 +4841,6 @@ CPU Features Detected:
   AVX-512BW: ✅
   AVX-512VL: ✅
   AVX-512VNNI: ✅
-  AVX-512BF16: ❌
-  AVX-512FP16: ❌
-OpenMP: ❌ Disabled
 
 🔧 RUNNING ANOMALY DIAGNOSTICS...
 This will help identify performance anomalies before running full benchmarks.
