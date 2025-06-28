@@ -19,6 +19,8 @@ github_repos:
   - repo: EthanCornell/Netgraph-Epochization-for-FreeBSD
     selected: true
   - repo: EthanCornell/Distributed-Raft-based-Chat-Server
+  - repo: EthanCornell/UltraSIMD
+    selected: true
   - repo: EthanCornell/CUDA-Renderer
   - repo: EthanCornell/MPI-Wandering-Salesman-Solver
   - repo: EthanCornell/Gossip-protocol
