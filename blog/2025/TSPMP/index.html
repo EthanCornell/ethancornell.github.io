@@ -163,6 +163,12 @@
             
           
             
+          
+            
+          
+            
+          
+            
               
                 
                 <li class="nav-item active">
@@ -774,7 +780,7 @@ First-fit allocation  All ranks participate  2-edge bounds        Production-rea
 
 <h3 id="implementation-flow-diagram">Implementation Flow Diagram</h3>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Program Startup
+<pre><code class="language-typograms">Program Startup
        ↓
    MPI_Init()
        ↓
@@ -803,7 +809,7 @@ First-fit allocation  All ranks participate  2-edge bounds        Production-rea
    Output Optimal Solution
           ↓
    MPI_Finalize()
-</code></pre></div></div>
+</code></pre>
 
 <h3 id="development-challenges-and-solutions">Development Challenges and Solutions</h3>
 
@@ -1166,7 +1172,7 @@ All Ranks: Compute own assignment → Perform DFS → Synchronize results
 
 <h3 id="architectural-flow-diagram-for-v2">Architectural Flow Diagram for V2</h3>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Program Initialization
+<pre><code class="language-typograms">Program Initialization
         ↓
     MPI_Init()
         ↓
@@ -1207,7 +1213,7 @@ Optimal Path Collection
 Output Results &amp; Cleanup
         ↓
     MPI_Finalize()
-</code></pre></div></div>
+</code></pre>
 
 <h3 id="performance-impact-analysis">Performance Impact Analysis</h3>
 
@@ -1689,7 +1695,7 @@ Improvement: 6× fewer nodes explored through better ordering
 
 <h3 id="enhanced-search-flow-diagram-for-v3">Enhanced Search Flow Diagram for V3</h3>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Initialization Phase
+<pre><code class="language-typograms">Initialization Phase
         ↓
 Precompute 2-Edge Bounds
 (cheapest1[], cheapest2[] for each city)
@@ -1726,7 +1732,7 @@ Create Enhanced Task Distribution
 Global Synchronization
         ↓
 Results Collection
-</code></pre></div></div>
+</code></pre>
 
 <h3 id="performance-impact-quantification">Performance Impact Quantification</h3>
 
@@ -2003,7 +2009,7 @@ Combined Algorithmic Impact: 27× speedup
 <h4 id="v3-limitation-analysis-and-problem-formulation">V3 Limitation Analysis and Problem Formulation</h4>
 
 <p><strong>Performance Profiling Revealed Critical Issues:</strong></p>
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>V3 Resource Utilization Assessment (24-core cluster node):
+<pre><code class="language-typograms">V3 Resource Utilization Assessment (24-core cluster node):
 ┌─────────────────────────────────────────────┐
 │              Hardware Reality               │
 ├─────────────────────────────────────────────┤
@@ -2022,7 +2028,7 @@ Root Cause: Architectural Mismatch
 ├── Software: Pure distributed memory model (MPI)
 ├── Hardware: Hierarchical shared memory systems
 └── Result: Massive resource waste
-</code></pre></div></div>
+</code></pre>
 
 <p><strong>The Design Challenge:</strong> How to utilize all 24 cores per node while preserving V3’s algorithmic breakthroughs?</p>
 
@@ -4745,6 +4751,14 @@ Comparison complete!
 
   <li class="my-2">
     
+      <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/RESTFULAPI/">Real-Time Cryptocurrency Trade Correlation Engine: A High-Performance C++ Implementation</a>
+    
+  </li>
+
+  
+
+  <li class="my-2">
+    
       <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/LFQ_EBR/">Lock-Free Queues with Advanced Memory Reclamation: A Deep Dive into Epoch-Based Reclamation and Hazard Pointers</a>
     
   </li>
@@ -4762,14 +4776,6 @@ Comparison complete!
   <li class="my-2">
     
       <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/memory/">Level 2 mini_malloc: From Scratch to Safe: Building a Thread-Safe Memory Allocator in C</a>
-    
-  </li>
-
-  
-
-  <li class="my-2">
-    
-      <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/basic_memory/">Level 1 mini_malloc: A Basic First-Fit Memory Allocator</a>
     
   </li>
 

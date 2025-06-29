@@ -41,6 +41,17 @@ ninja.data = [{
             window.location.href = "/blog/2025/SIMD/";
           
         },
+      },{id: "post-real-time-cryptocurrency-trade-correlation-engine-a-high-performance-c-implementation",
+        
+          title: "Real-Time Cryptocurrency Trade Correlation Engine: A High-Performance C++ Implementation",
+        
+        description: "Production-quality C++ system for real-time cryptocurrency trade aggregation and correlation detection across multiple exchanges",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/RESTFULAPI/";
+          
+        },
       },{id: "post-lock-free-queues-with-advanced-memory-reclamation-a-deep-dive-into-epoch-based-reclamation-and-hazard-pointers",
         
           title: "Lock-Free Queues with Advanced Memory Reclamation: A Deep Dive into Epoch-Based Reclamation and...",

@@ -163,6 +163,12 @@
             
           
             
+          
+            
+          
+            
+          
+            
               
                 
                 <li class="nav-item active">
@@ -421,7 +427,7 @@ A strictly pointer-protection approach for minimal memory overhead:</p>
 
 <p>The Michael &amp; Scott queue is deceptively simple in its structure, yet incredibly sophisticated in its guarantees. Let’s break down how it works:</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>┌─────────────────────────────────────────────────────────────────────────────┐
+<pre><code class="language-typograms">┌─────────────────────────────────────────────────────────────────────────────┐
 │                     The Michael &amp; Scott Queue Layout                        │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                             │
@@ -444,7 +450,7 @@ A strictly pointer-protection approach for minimal memory overhead:</p>
 │   • All connections use atomic pointers for thread safety                   │
 │   • The first real data always lives at head-&gt;next                          │
 └─────────────────────────────────────────────────────────────────────────────┘
-</code></pre></div></div>
+</code></pre>
 
 <p>This structure might seem unusual at first - why have a dummy node? The genius lies in the simplification it provides. By always having a dummy node at the head, we never need to handle the special case of an empty queue differently from a queue with items. The head pointer never changes to null, which eliminates many race conditions.</p>
 
@@ -452,7 +458,7 @@ A strictly pointer-protection approach for minimal memory overhead:</p>
 
 <p>When a thread wants to add an item to the queue, it follows a carefully orchestrated dance that ensures safety without locks:</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>┌─────────────────────────────────────────────────────────────────────────────┐
+<pre><code class="language-typograms">┌─────────────────────────────────────────────────────────────────────────────┐
 │                          Adding Items Safely                                │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                             │
@@ -483,7 +489,7 @@ A strictly pointer-protection approach for minimal memory overhead:</p>
 │   N is the number of competing threads. This bounded guarantee makes it     │
 │   "wait-free" rather than just "lock-free."                                 │
 └─────────────────────────────────────────────────────────────────────────────┘
-</code></pre></div></div>
+</code></pre>
 
 <p>This cooperative helping behavior is one of the most elegant aspects of the algorithm. When threads help each other advance the tail pointer, they reduce contention and improve overall system performance.</p>
 
@@ -491,7 +497,7 @@ A strictly pointer-protection approach for minimal memory overhead:</p>
 
 <p>Removing items requires even more care, as we need to safely extract data while potentially changing the queue structure:</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>┌─────────────────────────────────────────────────────────────────────────────┐
+<pre><code class="language-typograms">┌─────────────────────────────────────────────────────────────────────────────┐
 │                          Removing Items Safely                              │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                             │
@@ -525,7 +531,7 @@ A strictly pointer-protection approach for minimal memory overhead:</p>
 │   contention, the system as a whole always makes progress. At least one     │
 │   thread will always succeed in bounded time.                               │
 └─────────────────────────────────────────────────────────────────────────────┘
-</code></pre></div></div>
+</code></pre>
 
 <h3 id="the-memory-reclamation-challenge">The Memory Reclamation Challenge</h3>
 
@@ -561,7 +567,7 @@ A strictly pointer-protection approach for minimal memory overhead:</p>
 
 <p>EBR organizes time into discrete epochs and ensures that memory is only reclaimed after two complete epoch transitions. This guarantees that any thread that was accessing memory in epoch N cannot still be accessing it when we reach epoch N+2.</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>┌─────────────────────────────────────────────────────────────────────────────┐
+<pre><code class="language-typograms">┌─────────────────────────────────────────────────────────────────────────────┐
 │                    Understanding EBR's Time-Based Safety                    │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                             │
@@ -587,7 +593,7 @@ A strictly pointer-protection approach for minimal memory overhead:</p>
 │   Epoch N+1 → T1 might still be using X, so X stays in bucket N             │
 │   Epoch N+2 → T1 has definitely exited, X can be safely freed               │
 └─────────────────────────────────────────────────────────────────────────────┘
-</code></pre></div></div>
+</code></pre>
 
 <p>This two-grace-period guarantee is the cornerstone of EBR’s safety. It’s conservative but bulletproof: if any thread was accessing memory during epoch N, we know with mathematical certainty that it cannot still be accessing it during epoch N+2.</p>
 
@@ -618,7 +624,7 @@ A strictly pointer-protection approach for minimal memory overhead:</p>
 
 <p>The heart of EBR lies in its epoch advancement algorithm. This algorithm determines when it’s safe to move to the next epoch and reclaim memory from two epochs ago:</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>┌─────────────────────────────────────────────────────────────────────────────┐
+<pre><code class="language-typograms">┌─────────────────────────────────────────────────────────────────────────────┐
 │                         Epoch Advancement Logic                             │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                             │
@@ -658,7 +664,7 @@ A strictly pointer-protection approach for minimal memory overhead:</p>
 │   Key Insight: Hazard Pointers prevent memory reuse while threads are       │
 │   still operating on pointers, eliminating the ABA problem entirely.        │
 └─────────────────────────────────────────────────────────────────────────────┘
-</code></pre></div></div>
+</code></pre>
 
 <p>This ABA prevention is crucial for correctness in lock-free systems. By ensuring that memory cannot be reused while any thread might still be accessing it, Hazard Pointers eliminate an entire class of subtle but dangerous bugs.</p>
 
@@ -2140,7 +2146,7 @@ A strictly pointer-protection approach for minimal memory overhead:</p>
 
 <p>The journey into lock-free programming is challenging but immensely rewarding. These resources provide the foundation for both understanding the theory and building practical, high-performance systems. Remember that mastery comes through practice - implement, test, measure, and iterate your way to expertise.</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>┌─────────────────────────────────────────────────────────────────────────────┐        │                                                                             │
+<pre><code class="language-typograms">┌─────────────────────────────────────────────────────────────────────────────┐        │                                                                             │
 │                                                                             │
 │   Performing the Advancement:                                               │
 │   ┌─────────────────────────────────────────────────────────────────────┐   │
@@ -2156,7 +2162,7 @@ A strictly pointer-protection approach for minimal memory overhead:</p>
 │   have either finished their work from epoch N or are now participating     │
 │   in epoch N+1. The bucket from epoch N-1 becomes safe to reclaim.          │
 └─────────────────────────────────────────────────────────────────────────────┘
-</code></pre></div></div>
+</code></pre>
 
 <p>This advancement happens opportunistically. Whenever a thread retires memory and notices that the retirement bucket is getting full, it attempts to advance the epoch. This distributed approach means that epoch advancement happens naturally as the system operates, without requiring a dedicated coordinator thread.</p>
 
@@ -2164,7 +2170,7 @@ A strictly pointer-protection approach for minimal memory overhead:</p>
 
 <p>Let’s trace through a concrete example to see how EBR prevents use-after-free errors:</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Time Flow: ───────────────────────────────────────────────────────────────────▶
+<pre><code class="language-typograms">Time Flow: ───────────────────────────────────────────────────────────────────▶
 
 Epoch 0                    Epoch 1                    Epoch 2                    Epoch 3
    │                          │                          │                          │
@@ -2188,7 +2194,7 @@ Epoch 0                    Epoch 1                    Epoch 2                   
 
 Invariant Maintained: Node X cannot be deleted until Thread A has completely 
 exited its critical section AND two full grace periods have elapsed.
-</code></pre></div></div>
+</code></pre>
 
 <p>This timeline demonstrates EBR’s fundamental safety guarantee: <strong>no memory is ever freed while any thread could still be accessing it</strong>. The two-grace-period rule ensures this mathematically, making EBR provably safe under all conditions.</p>
 
@@ -2264,7 +2270,7 @@ exited its critical section AND two full grace periods have elapsed.
 
 <p>The system maintains a global table of hazard pointers that all threads can see:</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>┌─────────────────────────────────────────────────────────────────────────────┐
+<pre><code class="language-typograms">┌─────────────────────────────────────────────────────────────────────────────┐
 │                    Global Hazard Pointer Management                         │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                             │
@@ -2296,7 +2302,7 @@ exited its critical section AND two full grace periods have elapsed.
 │   • Each thread's retired list grows to at most R = H × RFactor             │
 │   • Total unreclaimed memory ≤ H + (R × N) nodes                            │
 └─────────────────────────────────────────────────────────────────────────────┘
-</code></pre></div></div>
+</code></pre>
 
 <p>This architecture provides strict memory bounds. Unlike EBR, where memory usage can grow unboundedly if epochs don’t advance, Hazard Pointers guarantee that memory usage never exceeds a calculable limit.</p>
 
@@ -2304,7 +2310,7 @@ exited its critical section AND two full grace periods have elapsed.
 
 <p>The heart of Hazard Pointer reclamation lies in the scan algorithm, which periodically checks which retired memory can be safely reclaimed:</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>┌─────────────────────────────────────────────────────────────────────────────┐
+<pre><code class="language-typograms">┌─────────────────────────────────────────────────────────────────────────────┐
 │                      Scan Algorithm: Finding Safe Memory                    │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                             │
@@ -2346,7 +2352,7 @@ exited its critical section AND two full grace periods have elapsed.
 │   Scan is triggered when retired list reaches threshold R = H × RFactor,    │
 │   making reclamation cost amortized O(1) per retire operation.              │
 └─────────────────────────────────────────────────────────────────────────────┘
-</code></pre></div></div>
+</code></pre>
 
 <p>This scan process is both simple and efficient. By taking a snapshot of all protected pointers and comparing against retired memory, we can safely reclaim any memory that no thread is currently protecting.</p>
 
@@ -2354,7 +2360,7 @@ exited its critical section AND two full grace periods have elapsed.
 
 <p>One of Hazard Pointers’ most important contributions is preventing the notorious ABA problem, a subtle but dangerous bug that can occur in lock-free systems:</p>
 
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>┌─────────────────────────────────────────────────────────────────────────────┐
+<pre><code class="language-typograms">┌─────────────────────────────────────────────────────────────────────────────┐
 │                        ABA Problem Prevention                               │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                             │
@@ -2390,7 +2396,7 @@ exited its critical section AND two full grace periods have elapsed.
 │   Key Insight: Hazard Pointers prevent memory reuse while threads are       │
 │   still operating on pointers, eliminating the ABA problem entirely.        │
 └─────────────────────────────────────────────────────────────────────────────┘
-</code></pre></div></div>
+</code></pre>
 
 <p>This ABA prevention is crucial for correctness in lock-free systems. By ensuring that memory cannot be reused while any thread might still be accessing it, Hazard Pointers eliminate an entire class of subtle but dangerous bugs.</p>
 
@@ -5488,6 +5494,14 @@ exited its critical section AND two full grace periods have elapsed.
 
   <li class="my-2">
     
+      <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/RESTFULAPI/">Real-Time Cryptocurrency Trade Correlation Engine: A High-Performance C++ Implementation</a>
+    
+  </li>
+
+  
+
+  <li class="my-2">
+    
       <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/TSPMP/">From 245s to 0.37s: Optimizing an MPI Traveling Salesman Solver</a>
     
   </li>
@@ -5505,14 +5519,6 @@ exited its critical section AND two full grace periods have elapsed.
   <li class="my-2">
     
       <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/memory/">Level 2 mini_malloc: From Scratch to Safe: Building a Thread-Safe Memory Allocator in C</a>
-    
-  </li>
-
-  
-
-  <li class="my-2">
-    
-      <a class="text-pink-700 underline font-semibold hover:text-pink-800" href="/blog/2025/basic_memory/">Level 1 mini_malloc: A Basic First-Fit Memory Allocator</a>
     
   </li>
 
