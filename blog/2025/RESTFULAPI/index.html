@@ -59,7 +59,7 @@
   <link rel="shortcut icon" href="data:image/svg+xml,&lt;svg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%20100%20100%22&gt;&lt;text%20y=%22.9em%22%20font-size=%2290%22&gt;%E2%9A%9B%EF%B8%8F&lt;/text&gt;&lt;/svg&gt;">
 
 <link rel="stylesheet" href="/assets/css/main.css?d41d8cd98f00b204e9800998ecf8427e">
-<link rel="canonical" href="http://localhost:4000/blog/2025/RESTFULAPI/">
+<link rel="canonical" href="https://ethanhuang.github.io/blog/2025/RESTFULAPI/">
 
 <!-- Dark Mode -->
 <script src="/assets/js/theme.js?f2531f05c6f8e1622518f4f5a1e385b1"></script>
@@ -260,7 +260,7 @@
   <header class="post-header">
     <h1 class="post-title">Real-Time Cryptocurrency Trade Correlation Engine: A High-Performance C++ Implementation</h1>
     <p class="post-meta">
-      Created on June 27, 2025
+      Created on June 30, 2025
       
       
       
@@ -2628,188 +2628,6 @@ BTC-USD	2025-06-12T18:36:04.207832Z	sell	0.00005000	107966.39000000
 
 <hr>
 
-<h2 id="appendix-a-build-instructions-1">Appendix A: Build Instructions</h2>
-
-<h3 id="prerequisites-1">Prerequisites</h3>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Ubuntu/Debian</span>
-<span class="nb">sudo </span>apt-get update
-<span class="nb">sudo </span>apt-get <span class="nb">install</span> <span class="nt">-y</span> build-essential cmake libcurl4-openssl-dev nlohmann-json3-dev
-
-<span class="c"># CentOS/RHEL</span>
-<span class="nb">sudo </span>yum groupinstall <span class="s2">"Development Tools"</span>
-<span class="nb">sudo </span>yum <span class="nb">install</span> <span class="nt">-y</span> cmake libcurl-devel
-
-<span class="c"># macOS</span>
-brew <span class="nb">install </span>cmake curl nlohmann-json
-</code></pre></div></div>
-
-<h3 id="compilation-1">Compilation</h3>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Optimized production build</span>
-g++ <span class="nt">-std</span><span class="o">=</span>c++20 <span class="nt">-O3</span> <span class="nt">-Wall</span> <span class="nt">-Wextra</span> <span class="nt">-pedantic</span> <span class="nt">-pthread</span> <span class="se">\</span>
-    main_production.cpp <span class="nt">-o</span> coinbase_aggregator <span class="nt">-lcurl</span>
-
-<span class="c"># Debug build with extensive logging</span>
-g++ <span class="nt">-std</span><span class="o">=</span>c++20 <span class="nt">-g</span> <span class="nt">-Wall</span> <span class="nt">-Wextra</span> <span class="nt">-pedantic</span> <span class="nt">-pthread</span> <span class="se">\</span>
-    <span class="nt">-DENABLE_DEBUG_LOG</span><span class="o">=</span>1 main_production.cpp <span class="nt">-o</span> coinbase_aggregator_debug <span class="nt">-lcurl</span>
-</code></pre></div></div>
-
-<h3 id="runtime-configuration-1">Runtime Configuration</h3>
-
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Environment variables for tuning</span>
-<span class="nb">export </span><span class="nv">POLL_INTERVAL_MS</span><span class="o">=</span>100
-<span class="nb">export </span><span class="nv">CORRELATION_WINDOW_US</span><span class="o">=</span>5000
-<span class="nb">export </span><span class="nv">OUTPUT_FILE</span><span class="o">=</span>trade_metrics.txt
-
-<span class="c"># Launch with statistics output</span>
-./coinbase_aggregator <span class="nt">--stats</span>
-</code></pre></div></div>
-
-<hr>
-
-<h2 id="appendix-b-sample-output-analysis-1">Appendix B: Sample Output Analysis</h2>
-
-<h3 id="trade-metrics-output-format-1">Trade Metrics Output Format</h3>
-
-<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ETH-USD	2025-06-12T18:04:00.669930Z	buy	0.00045140	2763.27000000
-SOL-USD	2025-06-12T18:04:00.665132Z	buy	0.06239500	159.86000000
-BTC-USD	2025-06-12T18:36:04.207832Z	sell	0.00005000	107966.39000000
-</code></pre></div></div>
-
-<p><strong>Format Specification:</strong></p>
-<ul>
-  <li>Tab-separated values for efficient parsing</li>
-  <li>ISO8601 timestamps with microsecond precision</li>
-  <li>Coinbase-native data types and precision</li>
-  <li>Side indicators (buy/sell) for market direction analysis</li>
-  <li>Decimal precision maintained for accurate financial calculations</li>
-</ul>
-
-<h3 id="correlation-pattern-analysis-1">Correlation Pattern Analysis</h3>
-
-<p>The test results reveal several interesting correlation patterns:</p>
-
-<ol>
-  <li>
-    <p><strong>Burst Correlations</strong>: Large groups of trades (20-40) occurring within the 5ms window, suggesting algorithmic trading activity or market events affecting multiple symbols simultaneously.</p>
-  </li>
-  <li>
-    <p><strong>Cross-Symbol Relationships</strong>: Strong correlation between ETH-USD and SOL-USD pairs, with BTC-USD showing more independent movement patterns.</p>
-  </li>
-  <li>
-    <p><strong>Temporal Clustering</strong>: Correlations tend to cluster in time, with periods of high activity followed by quieter intervals.</p>
-  </li>
-</ol>
-
-<h3 id="performance-scaling-characteristics-1">Performance Scaling Characteristics</h3>
-
-<p>Based on the test results, the system demonstrates:</p>
-
-<ul>
-  <li>
-<strong>Linear Throughput Scaling</strong>: Processing capacity scales linearly with available CPU cores</li>
-  <li>
-<strong>Bounded Memory Usage</strong>: Memory footprint remains stable despite processing over 1M trades</li>
-  <li>
-<strong>Predictable Latency</strong>: Latency distribution remains consistent under varying load conditions</li>
-  <li>
-<strong>Efficient Resource Utilization</strong>: High CPU utilization during correlation detection with minimal I/O wait</li>
-</ul>
-
-<hr>
-
-<h2 id="appendix-c-complete-implementation-1">Appendix C: Complete Implementation</h2>
-
-<p>The complete implementation is provided in the original document, featuring:</p>
-
-<ol>
-  <li>
-<strong>Configuration Management</strong> (Lines 18-35): Environment-based configuration with sensible defaults</li>
-  <li>
-<strong>Metrics Collection</strong> (Lines 40-95): Comprehensive observability with JSON output</li>
-  <li>
-<strong>Resilience Patterns</strong> (Lines 100-140): Exponential backoff and circuit breakers</li>
-  <li>
-<strong>Thread-Safe Queues</strong> (Lines 180-250): High-performance bounded queues with multiple drop strategies</li>
-  <li>
-<strong>Memory-Mapped I/O</strong> (Lines 300-400): Lock-free persistence with automatic expansion</li>
-  <li>
-<strong>Correlation Engine</strong> (Lines 650-750): Sliding window correlation detection with deduplication</li>
-  <li>
-<strong>API Integration</strong> (Lines 800-900): Coinbase REST API with proper error handling</li>
-  <li>
-<strong>Main Application</strong> (Lines 1200-1300): Complete system orchestration and lifecycle management</li>
-</ol>
-
-<h3 id="code-quality-metrics-1">Code Quality Metrics</h3>
-
-<ul>
-  <li>
-<strong>Lines of Code</strong>: ~1,400 (excluding comments and whitespace)</li>
-  <li>
-<strong>Cyclomatic Complexity</strong>: Average 3.2 (excellent maintainability)</li>
-  <li>
-<strong>Test Coverage</strong>: 100% of critical paths covered by integration tests</li>
-  <li>
-<strong>Documentation Coverage</strong>: 95% of public interfaces documented</li>
-  <li>
-<strong>Memory Safety</strong>: No dynamic allocation in critical paths, RAII throughout</li>
-</ul>
-
-<h3 id="performance-benchmarks-1">Performance Benchmarks</h3>
-
-<table>
-  <thead>
-    <tr>
-      <th>Metric</th>
-      <th>Value</th>
-      <th>Target</th>
-      <th>Status</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>End-to-End Latency</td>
-      <td>763ms</td>
-      <td>&lt;1000ms</td>
-      <td>✅ Pass</td>
-    </tr>
-    <tr>
-      <td>Correlation Detection</td>
-      <td>5ms precision</td>
-      <td>5ms requirement</td>
-      <td>✅ Pass</td>
-    </tr>
-    <tr>
-      <td>API Success Rate</td>
-      <td>100%</td>
-      <td>&gt;99%</td>
-      <td>✅ Pass</td>
-    </tr>
-    <tr>
-      <td>Memory Efficiency</td>
-      <td>50MB baseline</td>
-      <td>&lt;100MB</td>
-      <td>✅ Pass</td>
-    </tr>
-    <tr>
-      <td>Queue Overflow Rate</td>
-      <td>0%</td>
-      <td>&lt;1%</td>
-      <td>✅ Pass</td>
-    </tr>
-    <tr>
-      <td>Processing Rate</td>
-      <td>2,111/1,032,000</td>
-      <td>Variable</td>
-      <td>✅ Optimal</td>
-    </tr>
-  </tbody>
-</table>
-
-<p>The implementation successfully meets all performance targets while demonstrating production-quality engineering practices.</p>
-
 <h3 id="main_productioncpp">main_production.cpp</h3>
 
 <div class="language-cpp highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/*******************************************************************
@@ -4765,83 +4583,6 @@ BTC-USD	2025-06-12T18:36:04.207832Z	sell	0.00005000	107966.39000000
   "error_rate": 0
 }
 </code></pre></div></div>
-
-<hr>
-
-<h2 id="references-and-further-reading-1">References and Further Reading</h2>
-
-<h3 id="financial-technology-references-1">Financial Technology References</h3>
-
-<ol>
-  <li>
-<strong>Market Microstructure</strong>
-    <ul>
-      <li>“Market Microstructure Theory” - Maureen O’Hara</li>
-      <li>“Algorithmic Trading and DMA” - Barry Johnson</li>
-      <li>“High-Frequency Trading: A Practical Guide” - Irene Aldridge</li>
-    </ul>
-  </li>
-  <li>
-<strong>Cryptocurrency Markets</strong>
-    <ul>
-      <li>“Cryptoassets: The Innovative Investor’s Guide” - Burniske &amp; Tatar</li>
-      <li>“The Bitcoin Standard” - Saifedean Ammous</li>
-      <li>Coinbase Pro API Documentation</li>
-    </ul>
-  </li>
-</ol>
-
-<h3 id="systems-programming-references-1">Systems Programming References</h3>
-
-<ol>
-  <li>
-<strong>High-Performance C++</strong>
-    <ul>
-      <li>“Optimized C++” - Kurt Guntheroth</li>
-      <li>“C++ Concurrency in Action” - Anthony Williams</li>
-      <li>“The Art of Writing Efficient Programs” - Fedor Pikus</li>
-    </ul>
-  </li>
-  <li>
-<strong>Real-Time Systems</strong>
-    <ul>
-      <li>“Real-Time Systems Design and Analysis” - Klein &amp; Ralya</li>
-      <li>“Building Real-time Systems” - Walls &amp; Widman</li>
-      <li>“Systems Performance” - Brendan Gregg</li>
-    </ul>
-  </li>
-  <li>
-<strong>Financial Systems Architecture</strong>
-    <ul>
-      <li>“Building Microservices” - Sam Newman</li>
-      <li>“Designing Data-Intensive Applications” - Martin Kleppmann</li>
-      <li>“Release It!” - Michael Nygard</li>
-    </ul>
-  </li>
-</ol>
-
-<h3 id="online-resources-1">Online Resources</h3>
-
-<ol>
-  <li>
-<strong>Technical Documentation</strong>
-    <ul>
-      <li>Coinbase Exchange API Reference</li>
-      <li>cURL Library Documentation</li>
-      <li>nlohmann/json Library Reference</li>
-      <li>Linux Memory Management Documentation</li>
-    </ul>
-  </li>
-  <li>
-<strong>Performance Analysis Tools</strong>
-    <ul>
-      <li>Intel VTune Profiler</li>
-      <li>Valgrind Memory Analysis</li>
-      <li>Google Benchmark Framework</li>
-      <li>Linux perf Tools</li>
-    </ul>
-  </li>
-</ol>
 
 <hr>
 
