@@ -30,26 +30,15 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/cv/";
           },
-        },{id: "post-real-time-cryptocurrency-trade-correlation-engine-a-high-performance-c-implementation",
+        },{id: "post-c-preprocessor-tokenizer-a-complete-implementation-of-translation-phases-1-3",
         
-          title: "Real-Time Cryptocurrency Trade Correlation Engine: A High-Performance C++ Implementation",
+          title: "C++ Preprocessor Tokenizer: A Complete Implementation of Translation Phases 1-3",
         
-        description: "Production-quality C++ system for real-time cryptocurrency trade aggregation and correlation detection across multiple exchanges",
+        description: "Production-quality C++ implementation of preprocessing phases 1-3 with full UTF-8, trigraph, and universal character name support, achieving 24% performance improvement through advanced optimizations",
         section: "Posts",
         handler: () => {
           
-            window.location.href = "/blog/2025/RESTFULAPI/";
-          
-        },
-      },{id: "post-from-0-37x-to-18-7x-building-a-high-performance-simd-library-with-avx-512-speedups-in-data-science-inference-amp-hpc-workloads",
-        
-          title: "From 0.37x to 18.7x: Building a High-Performance SIMD Library with AVX-512 Speedups in...",
-        
-        description: "A comprehensive technical journey through building a high-performance SIMD library, achieving extraordinary speedups through masked operations, multiple data types, and advanced CPU feature detection.",
-        section: "Posts",
-        handler: () => {
-          
-            window.location.href = "/blog/2025/SIMD/";
+            window.location.href = "/blog/2025/ppToken/";
           
         },
       },{id: "post-lock-free-queues-with-advanced-memory-reclamation-a-deep-dive-into-epoch-based-reclamation-and-hazard-pointers",
@@ -72,6 +61,28 @@ ninja.data = [{
         handler: () => {
           
             window.location.href = "/blog/2025/TSPMP/";
+          
+        },
+      },{id: "post-real-time-cryptocurrency-trade-correlation-engine-a-high-performance-c-implementation",
+        
+          title: "Real-Time Cryptocurrency Trade Correlation Engine: A High-Performance C++ Implementation",
+        
+        description: "Production-quality C++ system for real-time cryptocurrency trade aggregation and correlation detection across multiple exchanges",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/RESTFULAPI/";
+          
+        },
+      },{id: "post-from-0-37x-to-18-7x-building-a-high-performance-simd-library-with-avx-512-speedups-in-data-science-inference-amp-hpc-workloads",
+        
+          title: "From 0.37x to 18.7x: Building a High-Performance SIMD Library with AVX-512 Speedups in...",
+        
+        description: "A comprehensive technical journey through building a high-performance SIMD library, achieving extraordinary speedups through masked operations, multiple data types, and advanced CPU feature detection.",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/SIMD/";
           
         },
       },{id: "post-level-3-mini-malloc-a-security-enhanced-memory-allocator-with-debugging-features",
