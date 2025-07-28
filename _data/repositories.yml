@@ -30,5 +30,7 @@ github_repos:
     selected: true
   - repo: EthanCornell/harmony
   - repo: EthanCornell/2048
+  - repo: EthanCornell/ppToken
+    selected: true
 
 

@@ -25,9 +25,17 @@
 - title: Experience
   type: time_table
   contents:
+    - title: Self‑Directed
+      institution: Career Break (Medical Leave)
+      year: 2024 – 2025
+      location: Rochester, NY
+      description:
+        - Conducted system-level research in OS design, concurrent programming.
+        - Developed high‑performance system components in C++  
+        - Engaged in light professional development - authored side C++ projects on GitHub and published two blog posts on systems design  
     - title: Research Assistant
       institution: "<a href='https://www.cs.cornell.edu/' target='_blank'> Cornell University </a>"
-      year: 2023 – Present
+      year: 2023 – 2024
       location: Ithaca, NY
       description:
         - Conducted system-level research in OS design, concurrent programming, and fault-tolerant systems.
