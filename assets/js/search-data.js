@@ -30,18 +30,7 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/cv/";
           },
-        },{id: "post-c-preprocessor-tokenizer-a-complete-implementation-of-translation-phases-1-3",
-        
-          title: "C++ Preprocessor Tokenizer: A Complete Implementation of Translation Phases 1-3",
-        
-        description: "Production-quality C++ implementation of preprocessing phases 1-3 with full UTF-8, trigraph, and universal character name support, achieving 24% performance improvement through advanced optimizations",
-        section: "Posts",
-        handler: () => {
-          
-            window.location.href = "/blog/2025/ppToken/";
-          
-        },
-      },{id: "post-lock-free-queues-with-advanced-memory-reclamation-a-deep-dive-into-epoch-based-reclamation-and-hazard-pointers",
+        },{id: "post-lock-free-queues-with-advanced-memory-reclamation-a-deep-dive-into-epoch-based-reclamation-and-hazard-pointers",
         
           title: "Lock-Free Queues with Advanced Memory Reclamation: A Deep Dive into Epoch-Based Reclamation and...",
         
@@ -50,6 +39,17 @@ ninja.data = [{
         handler: () => {
           
             window.location.href = "/blog/2025/LFQ_EBR/";
+          
+        },
+      },{id: "post-c-preprocessor-tokenizer-a-complete-implementation-of-translation-phases-1-3",
+        
+          title: "C++ Preprocessor Tokenizer: A Complete Implementation of Translation Phases 1-3",
+        
+        description: "Production-quality C++ implementation of preprocessing phases 1-3 with full UTF-8, trigraph, and universal character name support, achieving 24% performance improvement through advanced optimizations",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/ppToken/";
           
         },
       },{id: "post-from-245s-to-0-37s-optimizing-an-mpi-traveling-salesman-solver",
