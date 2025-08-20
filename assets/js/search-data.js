@@ -30,7 +30,18 @@ ninja.data = [{
           handler: () => {
             window.location.href = "/cv/";
           },
-        },{id: "post-lock-free-queues-with-advanced-memory-reclamation-a-deep-dive-into-epoch-based-reclamation-and-hazard-pointers",
+        },{id: "post-cy86-x86-64-translator-complete-implementation-with-performance-optimizations-from-zero-to-working-compiler",
+        
+          title: "CY86→x86-64 Translator: Complete Implementation with Performance Optimizations, From Zero to Working Compiler",
+        
+        description: "C++ implementation of a CY86 assembly language translator targeting x86-64 ELF executables, achieving 18% performance improvement through advanced compiler and codegen optimizations",
+        section: "Posts",
+        handler: () => {
+          
+            window.location.href = "/blog/2025/cy86/";
+          
+        },
+      },{id: "post-lock-free-queues-with-advanced-memory-reclamation-a-deep-dive-into-epoch-based-reclamation-and-hazard-pointers",
         
           title: "Lock-Free Queues with Advanced Memory Reclamation: A Deep Dive into Epoch-Based Reclamation and...",
         
