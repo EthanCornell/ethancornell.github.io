@@ -146,6 +146,9 @@ ninja.data = [{
           section: "News",},{id: "news-in-april-2024-i-joined-the-freebsd-community-as-an-independent-contributor-focusing-on-kernel-module-optimization-netgraph-subsystem-refactoring-and-experimenting-with-zero-copy-ipc-using-epoch-9-epoch-based-memory-reclamation",
           title: 'In April 2024, I joined the FreeBSD community as an independent contributor, focusing...',
           description: "",
+          section: "News",},{id: "news-september-2025-appointed-mts-software-development-engineer-at-amd-contributing-to-the-rocm-profiler-sdk-in-the-ai-group-to-improve-gpu-profiling-and-developer-tooling",
+          title: 'September 2025 — Appointed MTS (Software Development Engineer) at AMD, contributing to the...',
+          description: "",
           section: "News",},{
         id: 'social-email',
         title: 'email',
