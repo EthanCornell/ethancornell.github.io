@@ -49,4 +49,4 @@ My work spans across academic research, industry, and open source. At Cornell, I
 
 In open source, I’ve worked on the FreeBSD networking stack, improving Netgraph concurrency with lock-free programming and memory-safe synchronization under heavy network load. Prior to Cornell, I gained industry experience at ASUS, PCPartner, and Viking Family International, where I built real-time inventory engines, media apps, and CI pipelines, always with a focus on correctness, scalability, and performance.
 
-Currently based in New York, I enjoy working on problems that push the limits of concurrency, fault tolerance, and system efficiency, whether in kernel code, backend services, or distributed infrastructure.
+Currently based in Austin, TX. I enjoy working on problems that push the limits of concurrency, fault tolerance, and system efficiency, whether in kernel code, backend services, or distributed infrastructure.
