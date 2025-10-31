@@ -25,6 +25,13 @@
 - title: Experience
   type: time_table
   contents:
+    - title: MTS Software Development Engineer
+      institution: AMD
+      year: 2025 – now
+      location: Austin, TX
+      description:
+        - AI Group, ROCm profiler SDK team focusing on performance analysis and optimization for AMD GPUs.
+        - Developed new profiling features and enhanced existing tools to improve developer experience and performance insights.
     - title: Open Source Contributor
       institution: FreeBSD Foundation
       year: 2024 – now
@@ -33,7 +40,6 @@
         - Upstreamed five netgraph patches replacing topology mutexes with EBR to fix race conditions and boost packet throughput.
         - Contributed parallel locking to sys/netgraph/.
         - Developed ThreadSanitizer tests, VM scripts, and documentation for bhyve, raising virtualization test coverage.
-    
     - title: Research Assistant
       institution: "<a href='https://www.cs.cornell.edu/' target='_blank'> Cornell University </a>"
       year: 2023 – 2024
